@@ -205,8 +205,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Label("Chiến lược cân bằng tải", systemImage: "slider.horizontal.3")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+                    .font(.subheadline.bold())
                 Spacer()
                 Text(dataManager.currentStrategy.rawValue)
                     .font(.caption)
