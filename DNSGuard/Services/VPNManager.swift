@@ -62,7 +62,8 @@ public final class VPNManager: ObservableObject {
     private func createNewTunnelManager() {
         let manager = NETunnelProviderManager()
         let config = NETunnelProviderProtocol()
-        config.providerBundleIdentifier = AppGroupConstants.tunnelBundleId
+        let baseBundle = Bundle.main.bundleIdentifier ?? "com.antigravity.dnsguard"
+        config.providerBundleIdentifier = "\(baseBundle).tunnel"
         config.serverAddress = "DNSGuard Local Engine"
         
         manager.protocolConfiguration = config
@@ -73,7 +74,7 @@ public final class VPNManager: ObservableObject {
             guard let self = self else { return }
             if let error = error {
                 DispatchQueue.main.async {
-                    self.errorMessage = "Failed to save VPN configuration: \(error.localizedDescription)"
+                    self.errorMessage = "Lỗi lưu VPN: \(error.localizedDescription)"
                 }
             } else {
                 self.providerManager = manager
@@ -100,21 +101,36 @@ public final class VPNManager: ObservableObject {
             return
         }
         
+        let baseBundle = Bundle.main.bundleIdentifier ?? "com.antigravity.dnsguard"
+        if let config = manager.protocolConfiguration as? NETunnelProviderProtocol {
+            config.providerBundleIdentifier = "\(baseBundle).tunnel"
+            manager.protocolConfiguration = config
+        }
+        
         manager.isEnabled = true
         manager.saveToPreferences { [weak self] error in
             guard let self = self else { return }
             if let error = error {
                 DispatchQueue.main.async {
-                    self.errorMessage = error.localizedDescription
+                    self.errorMessage = "Không thể thêm cấu hình VPN: \(error.localizedDescription)"
                 }
                 return
             }
             
-            do {
-                try manager.connection.startVPNTunnel(options: nil)
-            } catch {
-                DispatchQueue.main.async {
-                    self.errorMessage = "Unable to start VPN: \(error.localizedDescription)"
+            manager.loadFromPreferences { [weak self] loadError in
+                guard let self = self else { return }
+                if let loadError = loadError {
+                    DispatchQueue.main.async {
+                        self.errorMessage = "Lỗi tải cấu hình VPN: \(loadError.localizedDescription)"
+                    }
+                    return
+                }
+                do {
+                    try manager.connection.startVPNTunnel(options: nil)
+                } catch {
+                    DispatchQueue.main.async {
+                        self.errorMessage = "Không thể khởi động VPN: \(error.localizedDescription)"
+                    }
                 }
             }
         }

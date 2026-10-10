@@ -35,6 +35,16 @@ struct DashboardView: View {
             }
             .navigationTitle("DNSGuard Optimizer")
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
+            .alert("Cấp quyền VPN iOS", isPresented: Binding(
+                get: { vpnManager.errorMessage != nil },
+                set: { if !$0 { vpnManager.errorMessage = nil } }
+            )) {
+                Button("Đã hiểu", role: .cancel) {
+                    vpnManager.errorMessage = nil
+                }
+            } message: {
+                Text(vpnManager.errorMessage ?? "")
+            }
         }
     }
     
