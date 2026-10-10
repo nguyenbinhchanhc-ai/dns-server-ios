@@ -290,23 +290,26 @@ struct ServerManagementView: View {
             .navigationBarItems(
                 leading: Button("Hủy") { showingAddSheet = false },
                 trailing: Button("Thêm") {
-                    guard !newName.isEmpty, !newIP.isEmpty else { return }
-                    let newBenchmark = LiveServerBenchmark(
-                        name: newName,
-                        ip: newIP,
-                        dohURL: newDoH.isEmpty ? "https://dns.google/dns-query" : newDoH,
-                        latencyMs: 30.0,
-                        colorHex: "#8E8E93",
-                        priorityTier: newTier
-                    )
-                    prober.benchmarks.append(newBenchmark)
-                    newName = ""
-                    newIP = ""
-                    newDoH = ""
-                    showingAddSheet = false
+                    addNewServer()
                 }
                 .disabled(newName.isEmpty || newIP.isEmpty)
             )
         }
+    }
+    
+    private func addNewServer() {
+        guard !newName.isEmpty, !newIP.isEmpty else { return }
+        let newBenchmark = LiveServerBenchmark(
+            name: newName,
+            ip: newIP,
+            dohURL: newDoH.isEmpty ? "https://dns.google/dns-query" : newDoH,
+            latencyMs: 30.0,
+            priorityTier: newTier
+        )
+        prober.benchmarks.append(newBenchmark)
+        newName = ""
+        newIP = ""
+        newDoH = ""
+        showingAddSheet = false
     }
 }
