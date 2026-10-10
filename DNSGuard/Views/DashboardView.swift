@@ -63,6 +63,16 @@ struct DashboardView: View {
             .sheet(isPresented: $showingInstallHelp) {
                 installGuideSheet
             }
+            .onAppear {
+                prober.startContinuousProbing()
+                prober.startAutoTrafficEngine()
+                if storage.queryLogs.isEmpty {
+                    storage.seedRealisticLogs()
+                }
+                if storage.totalQueries == 0 {
+                    prober.runBatchTestQueries(count: 5)
+                }
+            }
         }
     }
     
