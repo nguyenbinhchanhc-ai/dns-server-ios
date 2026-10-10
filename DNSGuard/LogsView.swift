@@ -4,7 +4,8 @@
 //
 //  Created for iOS Local DNS Optimizer.
 //  Persistent DNS Query & Packet Repair Inspector with local storage integration,
-//  domain search, high-density realtime streaming, and comprehensive 4-tier repair badges.
+//  domain search, high-density realtime streaming, QoS Priority Filter (P0-P3),
+//  and Color-Tagged Server & Priority Badges.
 //
 
 import SwiftUI
@@ -19,9 +20,11 @@ struct LogsView: View {
     
     enum LogFilter: String, CaseIterable {
         case all = "Tất cả"
-        case repaired = "Tự sửa lỗi"
-        case cached = "RAM Cache"
-        case racing = "Đua tốc độ"
+        case p0 = "P0 Khẩn cấp"
+        case p1 = "P1 Ưu tiên"
+        case p2 = "P2 Chuẩn"
+        case p3 = "P3 Lọc rác"
+        case repaired = "Vá lỗi"
     }
     
     var filteredLogs: [DNSQueryLog] {
@@ -30,12 +33,16 @@ struct LogsView: View {
         switch selectedFilter {
         case .all:
             break
+        case .p0:
+            logs = logs.filter { $0.priorityTier == "P0" }
+        case .p1:
+            logs = logs.filter { $0.priorityTier == "P1" }
+        case .p2:
+            logs = logs.filter { $0.priorityTier == "P2" }
+        case .p3:
+            logs = logs.filter { $0.priorityTier == "P3" }
         case .repaired:
             logs = logs.filter { $0.isRepaired }
-        case .cached:
-            logs = logs.filter { $0.isCached }
-        case .racing:
-            logs = logs.filter { $0.strategy == "Racing Turbo" }
         }
         
         if !searchText.isEmpty {
@@ -93,15 +100,27 @@ struct LogsView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 6)
                 
-                // Filter Segmented Control
-                Picker("Bộ lọc", selection: $selectedFilter) {
-                    ForEach(LogFilter.allCases, id: \.self) { filter in
-                        Text(filter.rawValue).tag(filter)
+                // QoS Priority & Status Filter Segmented Control
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(LogFilter.allCases, id: \.self) { filter in
+                            Button(action: {
+                                selectedFilter = filter
+                            }) {
+                                Text(filter.rawValue)
+                                    .font(.caption2)
+                                    .fontWeight(selectedFilter == filter ? .bold : .medium)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(selectedFilter == filter ? Color.blue : Color(.secondarySystemFill))
+                                    .foregroundColor(selectedFilter == filter ? .white : .primary)
+                                    .cornerRadius(8)
+                            }
+                        }
                     }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
                 }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding(.horizontal)
-                .padding(.bottom, 8)
                 
                 Divider()
                 
@@ -115,7 +134,7 @@ struct LogsView: View {
                             .font(.headline)
                             .foregroundColor(.secondary)
                         
-                        Text("Nhấn nút bên dưới để tạo ngay các truy vấn DNS và kiểm tra cơ chế tự sửa gói tin.")
+                        Text("Nhấn nút bên dưới để tạo ngay các truy vấn DNS đa mức ưu tiên QoS.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -189,6 +208,15 @@ struct LogsView: View {
     private func logRow(log: DNSQueryLog) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
+                // Priority Badge (P0, P1, P2, P3)
+                Text(log.priorityTier)
+                    .font(.system(size: 9, weight: .black))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(Color(hex: log.priorityColorHex).opacity(0.18))
+                    .foregroundColor(Color(hex: log.priorityColorHex))
+                    .cornerRadius(4)
+                
                 Text(log.domain)
                     .font(.system(.subheadline, design: .monospaced))
                     .fontWeight(.bold)
@@ -207,18 +235,22 @@ struct LogsView: View {
             }
             
             HStack(spacing: 8) {
-                if log.isCached {
-                    Label("RAM L1 Cache Hit", systemImage: "memorychip.fill")
+                // Server Badge with Server Color Tagging
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(Color(hex: log.serverColorHex))
+                        .frame(width: 6, height: 6)
+                    Text(log.serverUsed)
                         .font(.caption2)
                         .fontWeight(.semibold)
-                        .foregroundColor(.green)
-                } else {
-                    Label(log.serverUsed, systemImage: "server.rack")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color(hex: log.serverColorHex))
                 }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Color(hex: log.serverColorHex).opacity(0.12))
+                .cornerRadius(5)
                 
-                if let strat = log.strategy, strat != "L1 Ultra Fast" {
+                if let strat = log.strategy, strat != "L1 Fast-Path" {
                     Text("• \(strat)")
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)

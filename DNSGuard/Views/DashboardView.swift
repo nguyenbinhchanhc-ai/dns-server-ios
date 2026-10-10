@@ -5,7 +5,8 @@
 //  Created for iOS Local DNS Optimizer.
 //  Integrated with 1-Click Native MobileConfig Installer, Continuous Prober,
 //  Persistent On-Device Storage, RAM Cache Accelerator, High-Density Traffic Harvester,
-//  and 4-Tier Autonomous Packet Self-Healing Diagnostics.
+//  4-Tier Autonomous Packet Self-Healing Diagnostics,
+//  Color Tagging, and QoS Priority Distribution Matrix (P0 - P3).
 //
 
 import SwiftUI
@@ -40,16 +41,19 @@ struct DashboardView: View {
                     // MARK: 5. 1-CLICK HIGH-BURST TEST RUNNER
                     instantTestRunnerCard
                     
-                    // MARK: 6. 4-TIER AUTONOMOUS PACKET SELF-HEALING DIAGNOSTICS CARD
+                    // MARK: 6. QOS PRIORITY DISTRIBUTION MATRIX CARD (MỚI)
+                    priorityDistributionCard
+                    
+                    // MARK: 7. 4-TIER AUTONOMOUS PACKET SELF-HEALING DIAGNOSTICS CARD
                     packetSelfHealingCard
                     
-                    // MARK: 7. RAM CACHE & SPECULATIVE PREFETCH CARD
+                    // MARK: 8. RAM CACHE & SPECULATIVE PREFETCH CARD
                     ramAccelerationCard
                     
-                    // MARK: 8. CONTINUOUS BENCHMARK & SMART QUERY ROUTER
+                    // MARK: 9. CONTINUOUS BENCHMARK & COLOR-TAGGED QUERY ROUTER
                     continuousProbingCard
                     
-                    // MARK: 9. DATA MANAGEMENT & RESET
+                    // MARK: 10. DATA MANAGEMENT & RESET
                     dataManagementCard
                 }
                 .padding()
@@ -62,7 +66,7 @@ struct DashboardView: View {
                 }
                 Button("Hủy", role: .cancel) { }
             } message: {
-                Text("Toàn bộ số lượng truy vấn, nhật ký và số liệu tăng tốc đã lưu trên máy sẽ được đặt lại về 0.")
+                Text("Toàn bộ số lượng truy vấn, phân bổ ưu tiên QoS, nhật ký và số liệu tăng tốc đã lưu trên máy sẽ được đặt lại về 0.")
             }
             .sheet(isPresented: $showingInstallHelp) {
                 installGuideSheet
@@ -168,19 +172,19 @@ struct DashboardView: View {
                         .font(.system(size: 11, weight: .bold, design: .monospaced))
                         .foregroundColor(.blue)
                 }
-                Text("Thu nạp & điều phối lưu lượng đa ứng dụng liên tục")
+                Text("Thu nạp & điều phối QoS đa ứng dụng liên tục")
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
             }
             
             Spacer()
             
-            Text("MẬT ĐỘ CAO")
+            Text("QOS ĐIỀU PHỐI")
                 .font(.system(size: 9, weight: .bold))
                 .padding(.horizontal, 6)
                 .padding(.vertical, 3)
-                .background(Color.blue.opacity(0.15))
-                .foregroundColor(.blue)
+                .background(Color.purple.opacity(0.15))
+                .foregroundColor(.purple)
                 .cornerRadius(6)
         }
         .padding(.horizontal, 14)
@@ -263,7 +267,7 @@ struct DashboardView: View {
             metricCard(
                 title: "Tăng tốc Cache L1",
                 value: String(format: "%.1f%%", storage.cacheHitPercentage),
-                subtitle: "\(storage.cacheHits) hits (< 0.2ms)",
+                subtitle: "\(storage.cacheHits) hits (< 0.15ms)",
                 icon: "bolt.fill",
                 color: .orange
             )
@@ -346,7 +350,7 @@ struct DashboardView: View {
             .disabled(prober.isBatchRunning)
             
             if testSuccessMessage {
-                Text("✓ Đã xử lý & phân luồng thành công đợt bùng nổ 15 truy vấn toàn máy!")
+                Text("✓ Đã xử lý & phân luồng thành công đợt bùng nổ 15 truy vấn theo QoS!")
                     .font(.caption2)
                     .fontWeight(.semibold)
                     .foregroundColor(.green)
@@ -354,7 +358,102 @@ struct DashboardView: View {
         }
     }
     
-    // MARK: - 6. 4-Tier Autonomous Packet Self-Healing Diagnostics Card
+    // MARK: - 6. QoS Priority Distribution Matrix Card (MỚI)
+    
+    private var priorityDistributionCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("Phân Bổ Cấp Độ Ưu Tiên QoS", systemImage: "chart.bar.doc.horizontal.fill")
+                    .font(.subheadline.bold())
+                Spacer()
+                Text("Điều Phối Tự Động")
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.blue)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.blue.opacity(0.12))
+                    .cornerRadius(8)
+            }
+            
+            Text("Hệ thống tự động phân loại mức độ khẩn cấp của từng tên miền để gán luồng Fast-Path tối ưu:")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            
+            Divider()
+            
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                qosTierBadge(
+                    tier: "P0 Khẩn cấp",
+                    count: storage.p0QueriesCount,
+                    desc: "APNs / VoIP / Zalo",
+                    colorHex: "#FF3B30",
+                    icon: "bolt.fill"
+                )
+                
+                qosTierBadge(
+                    tier: "P1 Ưu tiên cao",
+                    count: storage.p1QueriesCount,
+                    desc: "Video / Thanh toán",
+                    colorHex: "#FF9500",
+                    icon: "flame.fill"
+                )
+                
+                qosTierBadge(
+                    tier: "P2 Tiêu chuẩn",
+                    count: storage.p2QueriesCount,
+                    desc: "Web / Báo chí / API",
+                    colorHex: "#007AFF",
+                    icon: "globe"
+                )
+                
+                qosTierBadge(
+                    tier: "P3 Lọc rác",
+                    count: storage.p3QueriesCount,
+                    desc: "Chặn 0.0.0.0 (0.05ms)",
+                    colorHex: "#8E8E93",
+                    icon: "hand.raised.fill"
+                )
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(18)
+        .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
+    }
+    
+    private func qosTierBadge(tier: String, count: Int, desc: String, colorHex: String, icon: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.subheadline)
+                .foregroundColor(Color(hex: colorHex))
+                .frame(width: 26, height: 26)
+                .background(Color(hex: colorHex).opacity(0.15))
+                .clipShape(Circle())
+            
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Text(tier)
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color(hex: colorHex))
+                    Spacer()
+                    Text("\(count)")
+                        .font(.system(.caption, design: .monospaced))
+                        .fontWeight(.black)
+                }
+                Text(desc)
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+        }
+        .padding(8)
+        .background(Color(.systemGroupedBackground))
+        .cornerRadius(10)
+    }
+    
+    // MARK: - 7. 4-Tier Autonomous Packet Self-Healing Diagnostics Card
     
     private var packetSelfHealingCard: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -433,7 +532,7 @@ struct DashboardView: View {
         }
     }
     
-    // MARK: - 7. RAM Cache Accelerator Metric & Speculative Prefetch
+    // MARK: - 8. RAM Cache Accelerator Metric & Speculative Prefetch
     
     private var ramAccelerationCard: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -490,7 +589,7 @@ struct DashboardView: View {
         .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
     }
     
-    // MARK: - 8. Continuous Probing & Smart Query Analysis
+    // MARK: - 9. Continuous Benchmark & Color-Tagged Query Router
     
     private var continuousProbingCard: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -508,17 +607,33 @@ struct DashboardView: View {
                     .foregroundColor(.secondary)
             }
             
-            // Top Servers Horizontal Ping
+            // Top Servers Horizontal Ping with Color Indicator & Priority Badges
             VStack(spacing: 8) {
-                ForEach(prober.benchmarks.prefix(4)) { server in
-                    HStack {
+                ForEach(prober.benchmarks.prefix(5)) { server in
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(Color(hex: server.colorHex))
+                            .frame(width: 8, height: 8)
+                        
+                        Text(server.priorityTier.badge)
+                            .font(.system(size: 9, weight: .black))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 1)
+                            .background(Color(hex: server.priorityTier.colorHex).opacity(0.18))
+                            .foregroundColor(Color(hex: server.priorityTier.colorHex))
+                            .cornerRadius(4)
+                        
                         Text(server.name)
                             .font(.caption)
                             .fontWeight(.medium)
+                            .lineLimit(1)
+                        
                         Spacer()
+                        
                         Text("Tải \(String(format: "%.0f%%", server.loadPercentage))")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.blue)
+                            .foregroundColor(Color(hex: server.colorHex))
+                        
                         Text(String(format: "%.1f ms", server.latencyMs))
                             .font(.system(.caption, design: .monospaced))
                             .fontWeight(.bold)
@@ -530,9 +645,9 @@ struct DashboardView: View {
             
             Divider()
             
-            // Smart Per-Query Analysis Stream
+            // Smart Per-Query Analysis Stream with QoS Badges
             VStack(alignment: .leading, spacing: 8) {
-                Text("Phân tích từng truy vấn theo Server tối ưu (Realtime):")
+                Text("Phân tích điều phối QoS từng tên miền (Realtime):")
                     .font(.caption2)
                     .fontWeight(.semibold)
                     .foregroundColor(.secondary)
@@ -578,7 +693,7 @@ struct DashboardView: View {
         .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
     }
     
-    // MARK: - 9. Data Management Card (Reset Button)
+    // MARK: - 10. Data Management Card (Reset Button)
     
     private var dataManagementCard: some View {
         HStack {

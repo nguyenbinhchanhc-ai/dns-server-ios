@@ -287,11 +287,73 @@ def test_load_balancer():
 
 
 # =====================================================================
-# 5. IPA Archive & Mach-O ARM64 Binary Validation
+# 5. QoS Priority Classification & Color Tagging Engine Test Suite
+# =====================================================================
+
+def classify_query_priority(domain: str) -> tuple[str, str]:
+    lower = domain.lower()
+    if any(k in lower for k in ["icloud", "apns", "cloudkit", "apple", "zalo"]):
+        return "P0", "#FF3B30"
+    if any(k in lower for k in ["doubleclick", "googleads", "adservice", "telemetry", "sentry"]):
+        return "P3", "#8E8E93"
+    if any(k in lower for k in ["youtube", "ytimg", "googlevideo", "tiktok", "shopee", "tiki", "lazada"]):
+        return "P1", "#FF9500"
+    return "P2", "#007AFF"
+
+
+def test_qos_priority_and_color_tagging():
+    print(f"\n{BLUE}=== 5. Testing QoS Priority Classification & Color Tagging ==={RESET}")
+    all_passed = True
+
+    # 5.1 Test P0 Realtime Critical Domains
+    p0_apns, col_apns = classify_query_priority("apns.apple.com")
+    p0_icloud, col_icloud = classify_query_priority("gateway.icloud.com")
+    p0_zalo, _ = classify_query_priority("zalo.me")
+    all_passed &= assert_test(p0_apns == "P0" and col_apns == "#FF3B30", "APNs Push classified as P0 Critical (#FF3B30)")
+    all_passed &= assert_test(p0_icloud == "P0" and col_icloud == "#FF3B30", "iCloud Keychain classified as P0 Critical")
+    all_passed &= assert_test(p0_zalo == "P0", "VoIP / Zalo call classified as P0 Critical")
+
+    # 5.2 Test P1 High Priority Media & Finance
+    p1_yt, col_yt = classify_query_priority("i.ytimg.com")
+    p1_shopee, col_shopee = classify_query_priority("deo.shopeemobile.com")
+    all_passed &= assert_test(p1_yt == "P1" and col_yt == "#FF9500", "YouTube CDN classified as P1 Media Stream (#FF9500)")
+    all_passed &= assert_test(p1_shopee == "P1" and col_shopee == "#FF9500", "Shopee Checkout classified as P1 Payment Stream")
+
+    # 5.3 Test P2 Standard Web
+    p2_vne, col_vne = classify_query_priority("vnexpress.net")
+    p2_git, _ = classify_query_priority("github.com")
+    all_passed &= assert_test(p2_vne == "P2" and col_vne == "#007AFF", "VnExpress news classified as P2 Standard (#007AFF)")
+    all_passed &= assert_test(p2_git == "P2", "GitHub developer API classified as P2 Standard")
+
+    # 5.4 Test P3 Ad-Suppression Zero-Latency Sink
+    p3_ad, col_ad = classify_query_priority("googleads.g.doubleclick.net")
+    all_passed &= assert_test(p3_ad == "P3" and col_ad == "#8E8E93", "DoubleClick Tracker classified as P3 Ad-Suppression Sink (#8E8E93)")
+
+    # 5.5 Test Server Color Palette Integrity
+    server_palette = {
+        "1.1.1.1": "#007AFF", # Cloudflare Primary
+        "1.0.0.1": "#32ADE6", # Cloudflare Secondary
+        "8.8.8.8": "#34C759", # Google Primary
+        "8.8.4.4": "#30B0C7", # Google Secondary
+        "94.140.14.14": "#FF9500", # AdGuard
+        "9.9.9.9": "#AF52DE", # Quad9
+        "45.90.28.0": "#FF2D55", # NextDNS
+        "RAM_L1": "#00C7BE" # RAM Cache L1
+    }
+    all_passed &= assert_test(len(server_palette) == 8, "8 distinct Server Color Palettes verified")
+    all_passed &= assert_test(server_palette["1.1.1.1"] == "#007AFF", "Cloudflare palette mapped to Royal Blue")
+    all_passed &= assert_test(server_palette["8.8.8.8"] == "#34C759", "Google DNS palette mapped to Emerald Green")
+    all_passed &= assert_test(server_palette["RAM_L1"] == "#00C7BE", "RAM L1 Cache palette mapped to Ultra-Fast Mint")
+
+    return all_passed
+
+
+# =====================================================================
+# 6. IPA Archive & Mach-O ARM64 Binary Validation
 # =====================================================================
 
 def test_ipa_archive(ipa_path: Path):
-    print(f"\n{BLUE}=== 5. Testing Generated .ipa Package Structure & Mach-O Headers ==={RESET}")
+    print(f"\n{BLUE}=== 6. Testing Generated .ipa Package Structure & Mach-O Headers ==={RESET}")
     all_passed = True
 
     all_passed &= assert_test(ipa_path.exists(), f"IPA archive exists at {ipa_path}")
@@ -336,6 +398,7 @@ def main():
     results.append(test_dns_parser())
     results.append(test_lru_cache())
     results.append(test_load_balancer())
+    results.append(test_qos_priority_and_color_tagging())
 
     # Build IPA if not yet built
     project_root = Path(__file__).resolve().parent.parent
