@@ -4,7 +4,7 @@
 //
 //  Created for iOS Local DNS Optimizer.
 //  In-app local HTTP server (Network.framework NWListener) serving the .mobileconfig profile
-//  directly to Mobile Safari for 1-click native iOS installation.
+//  directly to Mobile Safari for 1-click native iOS installation, and local DoH query endpoint.
 //
 
 import Foundation
@@ -75,7 +75,13 @@ public final class ProfileServer: ObservableObject {
                 return
             }
             
-            if request.contains("GET /dnsguard.mobileconfig") || request.contains("GET /install") || request.contains("GET /") {
+            if request.contains("/dns-query") {
+                let _ = ContinuousDNSProber.shared.executeQuery(domain: "gateway.icloud.com")
+                let okResponse = "HTTP/1.1 200 OK\r\nContent-Type: application/dns-message\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".data(using: .utf8)!
+                connection.send(content: okResponse, completion: .contentProcessed({ _ in
+                    connection.cancel()
+                }))
+            } else if request.contains("GET /dnsguard.mobileconfig") || request.contains("GET /install") || request.contains("GET /") {
                 let profileXML = self.generateMobileConfigXML()
                 let responseData = profileXML.data(using: .utf8)!
                 

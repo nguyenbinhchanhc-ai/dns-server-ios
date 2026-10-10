@@ -3,7 +3,7 @@
 //  DNSGuard
 //
 //  Created for iOS Local DNS VPN & Optimizer.
-//  Represents a logged DNS transaction for inspection and debugging.
+//  Represents a logged DNS transaction for inspection, telemetry, and debugging.
 //
 
 import Foundation
@@ -18,6 +18,8 @@ public struct DNSQueryLog: Identifiable, Codable {
     public var isCached: Bool
     public var isRepaired: Bool
     public var repairReason: String?
+    public var strategy: String?
+    public var resolvedIP: String?
     
     public init(id: String = UUID().uuidString,
                 domain: String,
@@ -27,7 +29,9 @@ public struct DNSQueryLog: Identifiable, Codable {
                 timestamp: Date = Date(),
                 isCached: Bool = false,
                 isRepaired: Bool = false,
-                repairReason: String? = nil) {
+                repairReason: String? = nil,
+                strategy: String? = nil,
+                resolvedIP: String? = nil) {
         self.id = id
         self.domain = domain
         self.recordType = recordType
@@ -37,5 +41,7 @@ public struct DNSQueryLog: Identifiable, Codable {
         self.isCached = isCached
         self.isRepaired = isRepaired
         self.repairReason = repairReason
+        self.strategy = strategy
+        self.resolvedIP = resolvedIP
     }
 }

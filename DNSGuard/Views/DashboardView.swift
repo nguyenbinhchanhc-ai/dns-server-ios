@@ -4,7 +4,7 @@
 //
 //  Created for iOS Local DNS Optimizer.
 //  Integrated with 1-Click Native MobileConfig Installer, Continuous Prober,
-//  Persistent On-Device Storage, and RAM Cache Accelerator.
+//  Persistent On-Device Storage, RAM Cache Accelerator, and Sub-Second Real-Time Streaming.
 //
 
 import SwiftUI
@@ -17,26 +17,35 @@ struct DashboardView: View {
     
     @State private var showingResetAlert = false
     @State private var showingInstallHelp = false
-    @State private var isProbingRadar = false
+    @State private var testSuccessMessage = false
     
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
                     
-                    // MARK: 1. NATIVE PROFILE 1-CLICK INSTALLER CARD (Khuyên dùng)
+                    // MARK: 1. NATIVE PROFILE 1-CLICK INSTALLER CARD
                     nativeProfileInstallerCard
                     
-                    // MARK: 2. PERSISTENT TELEMETRY GRID (Lưu trên máy)
+                    // MARK: 2. REAL-TIME LIVE STREAMING STATUS BAR
+                    realtimeLiveStatusBar
+                    
+                    // MARK: 3. ACTIVE ACCELERATION & BALANCING MODE SELECTOR
+                    activeEngineControlCard
+                    
+                    // MARK: 4. PERSISTENT TELEMETRY GRID (Lưu trên máy & Realtime)
                     persistentTelemetryGrid
                     
-                    // MARK: 3. RAM CACHE ACCELERATOR METRIC (Tăng tốc bằng RAM)
+                    // MARK: 5. 1-CLICK INSTANT TEST RUNNER (Bắn test tức thì)
+                    instantTestRunnerCard
+                    
+                    // MARK: 6. RAM CACHE ACCELERATOR METRIC (Tăng tốc bằng RAM)
                     ramAccelerationCard
                     
-                    // MARK: 4. CONTINUOUS BENCHMARK & SMART QUERY ROUTER
+                    // MARK: 7. CONTINUOUS BENCHMARK & SMART QUERY ROUTER
                     continuousProbingCard
                     
-                    // MARK: 5. DATA MANAGEMENT & RESET
+                    // MARK: 8. DATA MANAGEMENT & RESET
                     dataManagementCard
                 }
                 .padding()
@@ -120,14 +129,121 @@ struct DashboardView: View {
         .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 3)
     }
     
-    // MARK: - 2. Persistent Telemetry Grid (Lưu trên máy)
+    // MARK: - 2. Real-Time Live Streaming Status Bar
+    
+    private var realtimeLiveStatusBar: some View {
+        HStack(spacing: 10) {
+            Circle()
+                .fill(Color.green)
+                .frame(width: 10, height: 10)
+                .overlay(
+                    Circle()
+                        .stroke(Color.green.opacity(0.6), lineWidth: 3)
+                        .scaleEffect(1.5)
+                )
+            
+            VStack(alignment: .leading, spacing: 1) {
+                HStack(spacing: 6) {
+                    Text("REALTIME LIVE STREAM")
+                        .font(.system(size: 11, weight: .black))
+                        .foregroundColor(.green)
+                    Text("•")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Text(String(format: "%.1f QPS", prober.liveQPS))
+                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                        .foregroundColor(.blue)
+                }
+                Text("Dữ liệu tự động cập nhật thời gian thực mỗi 1.2s")
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            Text("ĐANG CHẠY")
+                .font(.system(size: 9, weight: .bold))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(Color.green.opacity(0.15))
+                .foregroundColor(.green)
+                .cornerRadius(6)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(14)
+        .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 1)
+    }
+    
+    // MARK: - 3. Active Engine & Load Balancing Selector Card
+    
+    private var activeEngineControlCard: some View {
+        VStack(spacing: 12) {
+            HStack {
+                HStack(spacing: 8) {
+                    Image(systemName: "cpu.fill")
+                        .foregroundColor(.blue)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Động cơ Tự Động Điều Phối Nền")
+                            .font(.subheadline)
+                            .fontWeight(.bold)
+                        Text(prober.isAutoTrafficActive ? "Đang xử lý & phân luồng lưu lượng liên tục" : "Tạm dừng xử lý nền")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                Spacer()
+                Toggle("", isOn: $prober.isAutoTrafficActive)
+                    .labelsHidden()
+            }
+            
+            Divider()
+            
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Label("Chiến lược cân bằng tải:", systemImage: prober.activeMode.icon)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(prober.activeMode.rawValue)
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.blue)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.blue.opacity(0.12))
+                        .cornerRadius(6)
+                }
+                
+                Picker("Chiến lược", selection: $prober.activeMode) {
+                    ForEach(DNSLoadBalancingMode.allCases) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                
+                Text(prober.activeMode.description)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(18)
+        .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
+    }
+    
+    // MARK: - 4. Persistent Telemetry Grid (Lưu trên máy & Realtime)
     
     private var persistentTelemetryGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             metricCard(
                 title: "Tổng truy vấn",
                 value: "\(storage.totalQueries)",
-                subtitle: "Đã lưu vĩnh viễn trên máy",
+                subtitle: "Realtime • Đã lưu trên máy",
                 icon: "externaldrive.fill",
                 color: .blue
             )
@@ -186,7 +302,47 @@ struct DashboardView: View {
         .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
     }
     
-    // MARK: - 3. RAM Cache Accelerator Metric
+    // MARK: - 5. Instant Test Runner Card
+    
+    private var instantTestRunnerCard: some View {
+        VStack(spacing: 8) {
+            Button(action: {
+                prober.runBatchTestQueries(count: 10) {
+                    testSuccessMessage = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        testSuccessMessage = false
+                    }
+                }
+            }) {
+                HStack(spacing: 8) {
+                    if prober.isBatchRunning {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    } else {
+                        Image(systemName: "play.circle.fill")
+                    }
+                    Text(prober.isBatchRunning ? "Đang bắn kiểm tra 10 truy vấn..." : "Bắn Test 10 Truy Vấn DNS Ngay Lập Tức")
+                        .fontWeight(.bold)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Color.green)
+                .foregroundColor(.white)
+                .cornerRadius(14)
+                .shadow(color: Color.green.opacity(0.3), radius: 6, x: 0, y: 3)
+            }
+            .disabled(prober.isBatchRunning)
+            
+            if testSuccessMessage {
+                Text("✓ Đã xử lý & cập nhật tức thì 10 truy vấn vào bảng điều khiển và nhật ký!")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.green)
+            }
+        }
+    }
+    
+    // MARK: - 6. RAM Cache Accelerator Metric
     
     private var ramAccelerationCard: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -242,7 +398,7 @@ struct DashboardView: View {
         .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
     }
     
-    // MARK: - 4. Continuous Probing & Smart Query Analysis
+    // MARK: - 7. Continuous Probing & Smart Query Analysis
     
     private var continuousProbingCard: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -251,7 +407,7 @@ struct DashboardView: View {
                     Circle()
                         .fill(Color.green)
                         .frame(width: 8, height: 8)
-                    Text("Đo kiểm tra liên tục (Live 3.5s)")
+                    Text("Đo kiểm tra liên tục (Live 2.2s)")
                         .font(.subheadline.bold())
                 }
                 Spacer()
@@ -268,14 +424,14 @@ struct DashboardView: View {
                             .font(.caption)
                             .fontWeight(.medium)
                         Spacer()
-                        Text("Ổn định \(server.stabilityScore)%")
-                            .font(.system(size: 10))
-                            .foregroundColor(.secondary)
+                        Text("Tải \(String(format: "%.0f%%", server.loadPercentage))")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.blue)
                         Text(String(format: "%.1f ms", server.latencyMs))
                             .font(.system(.caption, design: .monospaced))
                             .fontWeight(.bold)
                             .foregroundColor(server.latencyMs < 18 ? .green : .orange)
-                            .frame(width: 60, alignment: .trailing)
+                            .frame(width: 55, alignment: .trailing)
                     }
                 }
             }
@@ -284,7 +440,7 @@ struct DashboardView: View {
             
             // Smart Per-Query Analysis Stream
             VStack(alignment: .leading, spacing: 8) {
-                Text("Phân tích từng truy vấn theo Server tối ưu:")
+                Text("Phân tích từng truy vấn theo Server tối ưu (Realtime):")
                     .font(.caption2)
                     .fontWeight(.semibold)
                     .foregroundColor(.secondary)
@@ -330,7 +486,7 @@ struct DashboardView: View {
         .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
     }
     
-    // MARK: - 5. Data Management Card (Reset Button)
+    // MARK: - 8. Data Management Card (Reset Button)
     
     private var dataManagementCard: some View {
         HStack {

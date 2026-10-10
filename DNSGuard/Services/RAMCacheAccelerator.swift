@@ -30,7 +30,7 @@ public final class RAMCacheAccelerator: ObservableObject {
     @Published public var cachedEntriesCount: Int = 0
     @Published public var estimatedRAMUsageMB: Double = 3.6
     @Published public var averageRAMLookupTimeMs: Double = 0.18
-    @Published public var speedupMultiplier: Double = 125.0 // ~125x faster than 22ms network DNS
+    @Published public var speedupMultiplier: Double = 125.0
     @Published public var isRAMAcceleratorEnabled: Bool = true
     
     private var ramStorage: [String: RAMCacheItem] = [:]
@@ -53,15 +53,17 @@ public final class RAMCacheAccelerator: ObservableObject {
             ("google.com", "142.250.190.46", 300),
             ("youtube.com", "142.250.190.78", 300),
             ("i.ytimg.com", "142.250.190.110", 3600),
+            ("googleads.g.doubleclick.net", "0.0.0.0", 86400),
             ("cloudflare.com", "104.16.132.229", 3600),
             ("one.one.one.one", "1.1.1.1", 7200),
             ("dns.google", "8.8.8.8", 7200),
             ("vnexpress.net", "111.65.250.2", 600),
             ("shopee.vn", "143.204.101.45", 600),
             ("zalo.me", "49.213.120.1", 1200),
-            ("github.com", "140.82.121.4", 3600),
             ("facebook.com", "157.240.22.35", 300),
-            ("instagram.com", "157.240.22.174", 300)
+            ("instagram.com", "157.240.22.174", 300),
+            ("tiktok.com", "161.117.230.12", 600),
+            ("github.com", "140.82.121.4", 3600)
         ]
         
         for (dom, ip, ttl) in hotDomains {
@@ -71,7 +73,7 @@ public final class RAMCacheAccelerator: ObservableObject {
                 ipAddress: ip,
                 timestamp: Date(),
                 ttlSeconds: ttl,
-                hitCount: 1
+                hitCount: 2
             )
             ramStorage[dom.lowercased()] = item
         }
@@ -129,8 +131,7 @@ public final class RAMCacheAccelerator: ObservableObject {
     private func updateMetrics() {
         DispatchQueue.main.async {
             self.cachedEntriesCount = self.ramStorage.count
-            // Approx 3.5KB per record metadata + index
-            self.estimatedRAMUsageMB = max(1.2, Double(self.ramStorage.count * 3500) / (1024.0 * 1024.0))
+            self.estimatedRAMUsageMB = max(1.2, Double(self.ramStorage.count * 3800) / (1024.0 * 1024.0))
             let networkAvg = ContinuousDNSProber.shared.lowestLatencyMs
             self.speedupMultiplier = max(10.0, networkAvg / self.averageRAMLookupTimeMs)
         }
