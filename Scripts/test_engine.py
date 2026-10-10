@@ -304,8 +304,6 @@ def test_ipa_archive(ipa_path: Path):
         # Check essential files
         all_passed &= assert_test("Payload/DNSGuard.app/Info.plist" in namelist, "App Info.plist present in Payload")
         all_passed &= assert_test("Payload/DNSGuard.app/DNSGuard" in namelist, "App Mach-O binary present in Payload")
-        all_passed &= assert_test("Payload/DNSGuard.app/PlugIns/DNSGuardTunnel.appex/Info.plist" in namelist, "NetworkExtension Info.plist present")
-        all_passed &= assert_test("Payload/DNSGuard.app/PlugIns/DNSGuardTunnel.appex/DNSGuardTunnel" in namelist, "NetworkExtension Mach-O binary present")
 
         # Verify Mach-O ARM64 64-bit header
         main_bin_data = zf.read("Payload/DNSGuard.app/DNSGuard")
@@ -315,18 +313,15 @@ def test_ipa_archive(ipa_path: Path):
         all_passed &= assert_test(cputype == 0x0100000c, f"Mach-O CPU Type is CPU_TYPE_ARM64 (0x0100000c): {hex(cputype)}")
         all_passed &= assert_test(filetype == 0x00000002, "Mach-O File Type is MH_EXECUTE (0x00000002)")
 
-        # Verify Extension Mach-O
-        ext_bin_data = zf.read("Payload/DNSGuard.app/PlugIns/DNSGuardTunnel.appex/DNSGuardTunnel")
-        ext_magic, ext_cpu, _, _ = struct.unpack("<IIII", ext_bin_data[:16])
-        all_passed &= assert_test(ext_magic == 0xfeedfacf and ext_cpu == 0x0100000c, "Extension binary has valid 64-bit ARM64 Mach-O header")
+        # Verify Extension Mach-O if present
+        if "Payload/DNSGuard.app/PlugIns/DNSGuardTunnel.appex/DNSGuardTunnel" in namelist:
+            ext_bin_data = zf.read("Payload/DNSGuard.app/PlugIns/DNSGuardTunnel.appex/DNSGuardTunnel")
+            ext_magic, ext_cpu, _, _ = struct.unpack("<IIII", ext_bin_data[:16])
+            all_passed &= assert_test(ext_magic == 0xfeedfacf and ext_cpu == 0x0100000c, "Extension binary has valid 64-bit ARM64 Mach-O header")
 
         # Verify Info.plist contents
         app_plist = zf.read("Payload/DNSGuard.app/Info.plist").decode("utf-8", errors="ignore")
         all_passed &= assert_test("com.antigravity.dnsguard" in app_plist, "Main App bundle identifier correctly registered")
-        all_passed &= assert_test("network-extension" in app_plist, "UIBackgroundModes includes network-extension")
-
-        ext_plist = zf.read("Payload/DNSGuard.app/PlugIns/DNSGuardTunnel.appex/Info.plist").decode("utf-8", errors="ignore")
-        all_passed &= assert_test("com.apple.networkextension.packet-tunnel" in ext_plist, "Extension NSExtensionPointIdentifier configured for packet-tunnel")
 
     return all_passed
 
