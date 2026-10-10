@@ -712,6 +712,7 @@ public final class ContinuousDNSProber: ObservableObject {
                 category: "Thương Mại Điện Tử & Thanh Toán (P1)",
                 recommendedServer: "Cloudflare (Primary)",
                 expectedLatencyMs: 9.8,
+                latencySavedMs: 16.5,
                 reason: "P1 Ưu tiên cao: Edge Routing tối ưu thời gian xác nhận thanh toán tức thì."
             )
         } else {
