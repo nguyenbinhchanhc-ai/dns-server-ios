@@ -16,12 +16,13 @@
 		A001000729B7F10000000007 /* VPNManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000729B7F10000000007 /* VPNManager.swift */; };
 		A001000829B7F10000000008 /* SharedDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000829B7F10000000008 /* SharedDataManager.swift */; };
 		A001000929B7F10000000009 /* DNSQueryLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000929B7F10000000009 /* DNSQueryLog.swift */; };
+		A001000A29B7F1000000000A /* AppGroupConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000A29B7F1000000000A /* AppGroupConstants.swift */; };
 		A001000B29B7F1000000000B /* DNSLoadBalancer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000529B7F10000000005 /* DNSLoadBalancer.swift */; };
 		A001000D29B7F1000000000D /* ProfileServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000D29B7F1000000000D /* ProfileServer.swift */; };
 		A001000E29B7F1000000000E /* ContinuousDNSProber.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000E29B7F1000000000E /* ContinuousDNSProber.swift */; };
 		A001000F29B7F1000000000F /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000F29B7F1000000000F /* StorageManager.swift */; };
 		A001001029B7F10000000010 /* RAMCacheAccelerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001001029B7F10000000010 /* RAMCacheAccelerator.swift */; };
-		A001000C29B7F1000000000C /* DNSGuardTunnel.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C001000229B7F10000000002 /* DNSGuardTunnel.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A002000C29B7F1000000000C /* AppGroupConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000C29B7F1000000000C /* AppGroupConstants.swift */; };
 		
 		A002000129B7F10000000001 /* PacketTunnelProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000129B7F10000000001 /* PacketTunnelProvider.swift */; };
 		A002000229B7F10000000002 /* DNSEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000229B7F10000000002 /* DNSEngine.swift */; };
@@ -62,11 +63,15 @@
 		B001000729B7F10000000007 /* VPNManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VPNManager.swift; sourceTree = "<group>"; };
 		B001000829B7F10000000008 /* SharedDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDataManager.swift; sourceTree = "<group>"; };
 		B001000929B7F10000000009 /* DNSQueryLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSQueryLog.swift; sourceTree = "<group>"; };
+		B001000A29B7F1000000000A /* AppGroupConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupConstants.swift; sourceTree = "<group>"; };
+		B001000B29B7F1000000000B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B001000C29B7F1000000000C /* DNSGuard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DNSGuard.entitlements; sourceTree = "<group>"; };
 		B001000D29B7F1000000000D /* ProfileServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileServer.swift; sourceTree = "<group>"; };
 		B001000E29B7F1000000000E /* ContinuousDNSProber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousDNSProber.swift; sourceTree = "<group>"; };
 		B001000F29B7F1000000000F /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
 		B001001029B7F10000000010 /* RAMCacheAccelerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RAMCacheAccelerator.swift; sourceTree = "<group>"; };
+		
+		B002000C29B7F1000000000C /* AppGroupConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroupConstants.swift; sourceTree = "<group>"; };
 		
 		B002000129B7F10000000001 /* PacketTunnelProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacketTunnelProvider.swift; sourceTree = "<group>"; };
 		B002000229B7F10000000002 /* DNSEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSEngine.swift; sourceTree = "<group>"; };
@@ -128,6 +133,7 @@
 				B002000929B7F10000000009 /* DNSRecord.swift */,
 				B002000A29B7F1000000000A /* Info.plist */,
 				B002000B29B7F1000000000B /* DNSGuardTunnel.entitlements */,
+				B002000C29B7F1000000000C /* AppGroupConstants.swift */,
 			);
 			path = DNSGuardTunnel;
 			sourceTree = "<group>";
@@ -256,7 +262,7 @@
 				A002000729B7F10000000007 /* DNSUpstreamDispatcher.swift in Sources */,
 				A002000829B7F10000000008 /* IPPacket.swift in Sources */,
 				A002000929B7F10000000009 /* DNSRecord.swift in Sources */,
-				A002000A29B7F1000000000A /* AppGroupConstants.swift in Sources */,
+				A002000C29B7F1000000000C /* AppGroupConstants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
