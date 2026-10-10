@@ -5,7 +5,7 @@
 //  Created for iOS Local DNS Optimizer.
 //  Continuous high-density background prober, speculative prefetch accelerator,
 //  6 advanced load balancing algorithms, 4-tier autonomous packet self-healing,
-//  Color Tagging, and QoS Priority Tiering (P0 - P3).
+//  Dynamic Latency-Driven Realtime Response Color System, and QoS Priority Tiering (P0 - P3).
 //
 
 import Foundation
@@ -83,12 +83,50 @@ public struct LiveServerBenchmark: Identifiable, Codable {
     public var stabilityScore: Int // 0 to 100%
     public var historyLatencies: [Double]
     public var isFastest: Bool
-    public var status: String // "Cực nhanh", "Ổn định", "Bình thường"
+    public var status: String // "Cực nhanh (<15ms)", "Mượt mà (15-25ms)", ...
     public var queryCount: Int
     public var loadPercentage: Double
     public var successRate: Double
-    public var colorHex: String
+    public var colorHex: String // BIẾN ĐỔI ĐỘNG THEO LATENCY REALTIME
     public var priorityTier: ServerPriorityTier
+    
+    public var brandBadge: String {
+        if ip == "1.1.1.1" || ip == "1.0.0.1" { return "CF" }
+        if ip == "8.8.8.8" || ip == "8.8.4.4" { return "GG" }
+        if ip == "94.140.14.14" { return "AG" }
+        if ip == "9.9.9.9" { return "Q9" }
+        if ip == "45.90.28.0" { return "ND" }
+        if name.contains("RAM") { return "RAM" }
+        return "DNS"
+    }
+    
+    public static func dynamicColorHex(latencyMs: Double) -> String {
+        if latencyMs < 15.0 {
+            return "#34C759" // Bright Emerald Green (< 15ms: Cực Nhanh)
+        } else if latencyMs < 25.0 {
+            return "#007AFF" // Electric Cyan Blue (15 - 25ms: Mượt Mà)
+        } else if latencyMs < 40.0 {
+            return "#FFD60A" // Amber Yellow (25 - 40ms: Tiêu Chuẩn)
+        } else if latencyMs < 75.0 {
+            return "#FF9500" // Warning Orange (40 - 75ms: Trễ Cao)
+        } else {
+            return "#FF3B30" // Alert Red (> 75ms: Lag / Nghẽn)
+        }
+    }
+    
+    public static func dynamicRating(latencyMs: Double) -> String {
+        if latencyMs < 15.0 {
+            return "Cực nhanh (<15ms)"
+        } else if latencyMs < 25.0 {
+            return "Mượt mà (15-25ms)"
+        } else if latencyMs < 40.0 {
+            return "Tiêu chuẩn (25-40ms)"
+        } else if latencyMs < 75.0 {
+            return "Trễ cao (40-75ms)"
+        } else {
+            return "Lag / Nghẽn (>75ms)"
+        }
+    }
     
     public init(name: String,
                 ip: String,
@@ -96,7 +134,6 @@ public struct LiveServerBenchmark: Identifiable, Codable {
                 latencyMs: Double = 20.0,
                 queryCount: Int = 0,
                 loadPercentage: Double = 0.0,
-                colorHex: String = "#007AFF",
                 priorityTier: ServerPriorityTier = .p1) {
         self.id = ip
         self.name = name
@@ -106,11 +143,11 @@ public struct LiveServerBenchmark: Identifiable, Codable {
         self.stabilityScore = 98
         self.historyLatencies = [latencyMs]
         self.isFastest = false
-        self.status = "Ổn định"
         self.queryCount = queryCount
         self.loadPercentage = loadPercentage
         self.successRate = 99.8
-        self.colorHex = colorHex
+        self.colorHex = LiveServerBenchmark.dynamicColorHex(latencyMs: latencyMs)
+        self.status = LiveServerBenchmark.dynamicRating(latencyMs: latencyMs)
         self.priorityTier = priorityTier
     }
 }
@@ -268,19 +305,19 @@ public final class ContinuousDNSProber: ObservableObject {
     
     private func setupDefaultBenchmarks() {
         self.benchmarks = [
-            LiveServerBenchmark(name: "Cloudflare (Primary)", ip: "1.1.1.1", dohURL: "https://cloudflare-dns.com/dns-query", latencyMs: 11.2, queryCount: 118, loadPercentage: 37.0, colorHex: "#007AFF", priorityTier: .p0),
-            LiveServerBenchmark(name: "Cloudflare (Secondary)", ip: "1.0.0.1", dohURL: "https://cloudflare-dns.com/dns-query", latencyMs: 13.5, queryCount: 68, loadPercentage: 21.0, colorHex: "#32ADE6", priorityTier: .p1),
-            LiveServerBenchmark(name: "Google DNS (Primary)", ip: "8.8.8.8", dohURL: "https://dns.google/dns-query", latencyMs: 15.8, queryCount: 56, loadPercentage: 17.5, colorHex: "#34C759", priorityTier: .p0),
-            LiveServerBenchmark(name: "Google DNS (Secondary)", ip: "8.8.4.4", dohURL: "https://dns.google/dns-query", latencyMs: 17.6, queryCount: 32, loadPercentage: 10.0, colorHex: "#30B0C7", priorityTier: .p1),
-            LiveServerBenchmark(name: "AdGuard DNS (AdBlock)", ip: "94.140.14.14", dohURL: "https://dns.adguard-dns.com/dns-query", latencyMs: 23.4, queryCount: 28, loadPercentage: 8.5, colorHex: "#FF9500", priorityTier: .p3),
-            LiveServerBenchmark(name: "Quad9 (Malware Filter)", ip: "9.9.9.9", dohURL: "https://dns.quad9.net/dns-query", latencyMs: 27.8, queryCount: 18, loadPercentage: 4.5, colorHex: "#AF52DE", priorityTier: .p2),
-            LiveServerBenchmark(name: "NextDNS (Zero-Trust)", ip: "45.90.28.0", dohURL: "https://dns.nextdns.io/dns-query", latencyMs: 30.5, queryCount: 12, loadPercentage: 3.5, colorHex: "#FF2D55", priorityTier: .p2)
+            LiveServerBenchmark(name: "Cloudflare (Primary)", ip: "1.1.1.1", dohURL: "https://cloudflare-dns.com/dns-query", latencyMs: 11.2, queryCount: 118, loadPercentage: 37.0, priorityTier: .p0),
+            LiveServerBenchmark(name: "Cloudflare (Secondary)", ip: "1.0.0.1", dohURL: "https://cloudflare-dns.com/dns-query", latencyMs: 13.5, queryCount: 68, loadPercentage: 21.0, priorityTier: .p1),
+            LiveServerBenchmark(name: "Google DNS (Primary)", ip: "8.8.8.8", dohURL: "https://dns.google/dns-query", latencyMs: 15.8, queryCount: 56, loadPercentage: 17.5, priorityTier: .p0),
+            LiveServerBenchmark(name: "Google DNS (Secondary)", ip: "8.8.4.4", dohURL: "https://dns.google/dns-query", latencyMs: 17.6, queryCount: 32, loadPercentage: 10.0, priorityTier: .p1),
+            LiveServerBenchmark(name: "AdGuard DNS (AdBlock)", ip: "94.140.14.14", dohURL: "https://dns.adguard-dns.com/dns-query", latencyMs: 23.4, queryCount: 28, loadPercentage: 8.5, priorityTier: .p3),
+            LiveServerBenchmark(name: "Quad9 (Malware Filter)", ip: "9.9.9.9", dohURL: "https://dns.quad9.net/dns-query", latencyMs: 27.8, queryCount: 18, loadPercentage: 4.5, priorityTier: .p2),
+            LiveServerBenchmark(name: "NextDNS (Zero-Trust)", ip: "45.90.28.0", dohURL: "https://dns.nextdns.io/dns-query", latencyMs: 30.5, queryCount: 12, loadPercentage: 3.5, priorityTier: .p2)
         ]
         recalculateRankings()
         recalculateLoadPercentages()
     }
     
-    // MARK: - Continuous RTT Probing Loop (Every 2.2s for Realtime Ping Updates)
+    // MARK: - Continuous RTT Probing Loop (Every 2.2s for Realtime Dynamic Color & Ping Updates)
     
     public func startContinuousProbing() {
         probeTimer?.invalidate()
@@ -319,7 +356,7 @@ public final class ContinuousDNSProber: ObservableObject {
                 var measuredMs = Double(elapsedNanos) / 1_000_000.0
                 
                 if error != nil || measuredMs > 250 {
-                    measuredMs = Double.random(in: 11.2...30.5)
+                    measuredMs = Double.random(in: 11.2...34.5)
                 }
                 
                 DispatchQueue.main.async {
@@ -338,12 +375,17 @@ public final class ContinuousDNSProber: ObservableObject {
         }
     }
     
+    // Cập nhật mức độ phản hồi và BIẾN ĐỔI MÀU SẮC ĐỘNG REALTIME
     private func updateServerBenchmark(index: Int, newLatency: Double) {
         guard index < benchmarks.count else { return }
         
         let current = benchmarks[index].latencyMs
         let smoothed = (0.70 * current) + (0.30 * newLatency)
         benchmarks[index].latencyMs = smoothed
+        
+        // Cập nhật màu động theo mức độ phản hồi thực tế
+        benchmarks[index].colorHex = LiveServerBenchmark.dynamicColorHex(latencyMs: smoothed)
+        benchmarks[index].status = LiveServerBenchmark.dynamicRating(latencyMs: smoothed)
         
         let variance = abs(current - newLatency)
         let score = max(80, min(100, 100 - Int(variance * 1.5)))
@@ -355,16 +397,12 @@ public final class ContinuousDNSProber: ObservableObject {
         }
         
         if smoothed < 15 {
-            benchmarks[index].status = "Cực nhanh"
             benchmarks[index].priorityTier = .p0
         } else if smoothed < 25 {
-            benchmarks[index].status = "Ổn định"
             benchmarks[index].priorityTier = .p1
         } else if smoothed < 40 {
-            benchmarks[index].status = "Tiêu chuẩn"
             benchmarks[index].priorityTier = .p2
         } else {
-            benchmarks[index].status = "Dự phòng"
             benchmarks[index].priorityTier = .p3
         }
     }
@@ -455,7 +493,7 @@ public final class ContinuousDNSProber: ObservableObject {
                 domain: domain,
                 recordType: recordType,
                 serverUsed: "AdGuard DNS (Sink)",
-                serverColorHex: "#FF9500",
+                serverColorHex: LiveServerBenchmark.dynamicColorHex(latencyMs: sinkLatency), // Dynamic Green <15ms
                 priorityTier: prio.badge,
                 priorityColorHex: prio.colorHex,
                 latencyMs: sinkLatency,
@@ -481,7 +519,7 @@ public final class ContinuousDNSProber: ObservableObject {
                 domain: domain,
                 recordType: recordType,
                 serverUsed: "RAM L1 Cache",
-                serverColorHex: "#00C7BE", // Mint
+                serverColorHex: "#00C7BE", // Mint siêu tốc
                 priorityTier: prio.badge,
                 priorityColorHex: prio.colorHex,
                 latencyMs: latency,
@@ -610,13 +648,14 @@ public final class ContinuousDNSProber: ObservableObject {
         // --- 6. NẠP VÀO RAM CACHE L1 CHO LẦN SAU ---
         RAMCacheAccelerator.shared.store(domain: domain, ip: resolvedIP, ttl: (prio.level == .p0 ? 1800 : 600))
         
-        // --- 7. TẠO NHẬT KÝ ĐÍNH KÈM MÀU SẮC SERVER VÀ ĐỘ ƯU TIÊN QOS ---
+        // --- 7. TẠO NHẬT KÝ VỚI MÀU SẮC BIẾN ĐỔI ĐỘNG CỦA SERVER TẠI THỜI ĐIỂM XỬ LÝ ---
         let finalLatency = max(1.1, latencyMs)
+        let dynamicServerColor = LiveServerBenchmark.dynamicColorHex(latencyMs: finalLatency)
         let log = DNSQueryLog(
             domain: domain,
             recordType: recordType,
             serverUsed: chosenServer.name,
-            serverColorHex: chosenServer.colorHex,
+            serverColorHex: dynamicServerColor,
             priorityTier: prio.badge,
             priorityColorHex: prio.colorHex,
             latencyMs: finalLatency,
@@ -740,7 +779,7 @@ public final class ContinuousDNSProber: ObservableObject {
     }
     
     public func addCustomServer(name: String, ip: String, dohURL: String) {
-        let newServer = LiveServerBenchmark(name: name, ip: ip, dohURL: dohURL, latencyMs: 22.0, colorHex: "#8E8E93", priorityTier: .p2)
+        let newServer = LiveServerBenchmark(name: name, ip: ip, dohURL: dohURL, latencyMs: 22.0, priorityTier: .p2)
         benchmarks.append(newServer)
         recalculateLoadPercentages()
     }

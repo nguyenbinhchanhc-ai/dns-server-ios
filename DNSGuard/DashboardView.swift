@@ -607,13 +607,38 @@ struct DashboardView: View {
                     .foregroundColor(.secondary)
             }
             
-            // Top Servers Horizontal Ping with Color Indicator & Priority Badges
+            // Thước đo phổ màu phản hồi động Realtime
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    spectrumPill(title: "<15ms Cực nhanh", colorHex: "#34C759")
+                    spectrumPill(title: "15-25ms Mượt mà", colorHex: "#007AFF")
+                    spectrumPill(title: "25-40ms Chuẩn", colorHex: "#FFD60A")
+                    spectrumPill(title: "40-75ms Trễ cao", colorHex: "#FF9500")
+                    spectrumPill(title: ">75ms Nghẽn", colorHex: "#FF3B30")
+                }
+            }
+            .padding(.vertical, 2)
+            
+            // Top Servers Horizontal Ping with Brand Badge & Dynamic Health Colors
             VStack(spacing: 8) {
-                ForEach(prober.benchmarks.prefix(5)) { server in
+                ForEach(prober.benchmarks) { server in
                     HStack(spacing: 8) {
+                        Text(server.brandBadge)
+                            .font(.system(size: 9, weight: .black))
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 2)
+                            .background(Color.secondary.opacity(0.15))
+                            .foregroundColor(.primary)
+                            .cornerRadius(4)
+                        
                         Circle()
                             .fill(Color(hex: server.colorHex))
                             .frame(width: 8, height: 8)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color(hex: server.colorHex).opacity(0.5), lineWidth: 2)
+                                    .scaleEffect(1.4)
+                            )
                         
                         Text(server.priorityTier.badge)
                             .font(.system(size: 9, weight: .black))
@@ -630,15 +655,17 @@ struct DashboardView: View {
                         
                         Spacer()
                         
-                        Text("Tải \(String(format: "%.0f%%", server.loadPercentage))")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(Color(hex: server.colorHex))
-                        
-                        Text(String(format: "%.1f ms", server.latencyMs))
-                            .font(.system(.caption, design: .monospaced))
-                            .fontWeight(.bold)
-                            .foregroundColor(server.latencyMs < 18 ? .green : .orange)
-                            .frame(width: 55, alignment: .trailing)
+                        VStack(alignment: .trailing, spacing: 1) {
+                            HStack(spacing: 4) {
+                                Text(String(format: "%.1f ms", server.latencyMs))
+                                    .font(.system(.caption, design: .monospaced))
+                                    .fontWeight(.bold)
+                                    .foregroundColor(Color(hex: server.colorHex))
+                            }
+                            Text(server.status)
+                                .font(.system(size: 8, weight: .semibold))
+                                .foregroundColor(Color(hex: server.colorHex))
+                        }
                     }
                 }
             }
@@ -691,6 +718,21 @@ struct DashboardView: View {
         .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(18)
         .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
+    }
+    
+    private func spectrumPill(title: String, colorHex: String) -> some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(Color(hex: colorHex))
+                .frame(width: 6, height: 6)
+            Text(title)
+                .font(.system(size: 9, weight: .bold))
+                .foregroundColor(Color(hex: colorHex))
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(Color(hex: colorHex).opacity(0.12))
+        .cornerRadius(6)
     }
     
     // MARK: - 10. Data Management Card (Reset Button)

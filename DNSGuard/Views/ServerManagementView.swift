@@ -100,16 +100,32 @@ struct ServerManagementView: View {
                 }
                 
                 // MARK: 3. SERVER RANKING & COLOR-CODED LOAD SHARE
+                // MARK: 3. SERVER RANKING & DYNAMIC HEALTH COLOR LOAD SHARE
                 Section(
-                    header: Text("Bảng máy chủ, Màu nhận diện & Cấp độ QoS (P0-P3)"),
-                    footer: Text("Máy chủ P0 gánh vác các truy vấn khẩn cấp (Push/VoIP). Tỷ lệ chia tải tự động điều phối theo thuật toán \(prober.activeMode.rawValue).")
+                    header: Text("Bảng máy chủ, Tình trạng phản hồi động & Chia tải"),
+                    footer: Text("Màu sắc biến đổi realtime theo độ trễ. Tỷ lệ chia tải tự động điều phối theo thuật toán \(prober.activeMode.rawValue).")
                 ) {
                     ForEach(prober.benchmarks.sorted(by: { $0.latencyMs < $1.latencyMs })) { server in
                         VStack(alignment: .leading, spacing: 8) {
-                            HStack(spacing: 10) {
+                            HStack(spacing: 8) {
+                                // Server Brand Identification Badge
+                                Text(server.brandBadge)
+                                    .font(.system(size: 9, weight: .black))
+                                    .padding(.horizontal, 5)
+                                    .padding(.vertical, 2)
+                                    .background(Color.secondary.opacity(0.15))
+                                    .foregroundColor(.primary)
+                                    .cornerRadius(4)
+                                
+                                // Dynamic Real-Time Health Indicator
                                 Circle()
                                     .fill(Color(hex: server.colorHex))
-                                    .frame(width: 12, height: 12)
+                                    .frame(width: 10, height: 10)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(Color(hex: server.colorHex).opacity(0.5), lineWidth: 2)
+                                            .scaleEffect(1.4)
+                                    )
                                 
                                 VStack(alignment: .leading, spacing: 3) {
                                     HStack(spacing: 6) {
@@ -147,7 +163,11 @@ struct ServerManagementView: View {
                                     Text(String(format: "%.1f ms", server.latencyMs))
                                         .font(.system(.caption, design: .monospaced))
                                         .fontWeight(.bold)
-                                        .foregroundColor(server.latencyMs < 18 ? .green : .orange)
+                                        .foregroundColor(Color(hex: server.colorHex))
+                                    
+                                    Text(server.status)
+                                        .font(.system(size: 8, weight: .bold))
+                                        .foregroundColor(Color(hex: server.colorHex))
                                     
                                     Text("Tải: \(String(format: "%.1f%%", server.loadPercentage))")
                                         .font(.system(size: 10, weight: .bold))
@@ -155,7 +175,7 @@ struct ServerManagementView: View {
                                 }
                             }
                             
-                            // Visual Color Load Distribution Bar
+                            // Visual Dynamic Health Color Load Distribution Bar
                             GeometryReader { geo in
                                 ZStack(alignment: .leading) {
                                     RoundedRectangle(cornerRadius: 3)
@@ -182,16 +202,17 @@ struct ServerManagementView: View {
                     }
                 }
                 
-                // MARK: 4. COLOR & PRIORITY TIER LEGEND SECTION
-                Section(header: Text("Bảng phân loại màu sắc & Cấp độ QoS chuẩn")) {
-                    tierLegendRow(name: "Cloudflare Primary (1.1.1.1)", colorHex: "#007AFF", tier: "P0", desc: "Xanh Lam • Tối Thượng (<15ms)")
-                    tierLegendRow(name: "Cloudflare Secondary (1.0.0.1)", colorHex: "#32ADE6", tier: "P1", desc: "Xanh Cyan • Ưu Tiên Cao (15-25ms)")
-                    tierLegendRow(name: "Google DNS Primary (8.8.8.8)", colorHex: "#34C759", tier: "P0", desc: "Xanh Lục • Tối Thượng Anycast (<15ms)")
-                    tierLegendRow(name: "Google DNS Secondary (8.8.4.4)", colorHex: "#30B0C7", tier: "P1", desc: "Xanh Bạc Hà • Dự Phòng Nhanh (15-25ms)")
-                    tierLegendRow(name: "AdGuard DNS (94.140.14.14)", colorHex: "#FF9500", tier: "P3", desc: "Cam Hổ Phách • Lọc Rác & Chặn Ad (0ms)")
-                    tierLegendRow(name: "Quad9 Malware Filter (9.9.9.9)", colorHex: "#AF52DE", tier: "P2", desc: "Tím Thạch Anh • Tiêu Chuẩn (25-40ms)")
-                    tierLegendRow(name: "NextDNS Zero-Trust (45.90.28.0)", colorHex: "#FF2D55", tier: "P2", desc: "Hồng Cánh Sen • Bảo Mật Chuyên Sâu (25-40ms)")
-                    tierLegendRow(name: "Bộ Đệm RAM L1 Cache (Local)", colorHex: "#00C7BE", tier: "L1", desc: "Xanh Mint Siêu Tốc • Truy xuất tức thì (<0.15ms)")
+                // MARK: 4. DYNAMIC HEALTH SPECTRUM & BRAND LEGEND SECTION
+                Section(
+                    header: Text("Phổ màu phản hồi động Realtime & Nhận diện máy chủ"),
+                    footer: Text("Màu sắc của máy chủ KHÔNG cố định mà tự động biến đổi liên tục theo mức phản hồi hiện tại (mỗi 2.2s). Thẻ chữ viết tắt (CF, GG, AG, Q9, ND) giúp bạn nhận diện riêng biệt từng máy chủ bất kể màu sắc đang biến đổi.")
+                ) {
+                    tierLegendRow(name: "Phản hồi < 15.0 ms", colorHex: "#34C759", tier: "EXC", desc: "Xanh Lục Emerald • Cực nhanh - Phản hồi ngay")
+                    tierLegendRow(name: "Phản hồi 15.0 - 25.0 ms", colorHex: "#007AFF", tier: "GOOD", desc: "Xanh Lam Electric • Mượt mà - Nhanh")
+                    tierLegendRow(name: "Phản hồi 25.0 - 40.0 ms", colorHex: "#FFD60A", tier: "NORM", desc: "Vàng Hổ Phách • Tiêu chuẩn - Ổn định")
+                    tierLegendRow(name: "Phản hồi 40.0 - 75.0 ms", colorHex: "#FF9500", tier: "WARN", desc: "Cam Cảnh Báo • Trễ cao - Chậm")
+                    tierLegendRow(name: "Phản hồi > 75.0 ms", colorHex: "#FF3B30", tier: "SLOW", desc: "Đỏ Cảnh Báo • Nghẽn mạng / Lag")
+                    tierLegendRow(name: "Bộ Đệm RAM L1 Cache", colorHex: "#00C7BE", tier: "RAM", desc: "Xanh Mint Siêu Tốc • Truy xuất tức thì (<0.15ms)")
                 }
                 
                 // MARK: 5. PROFILE GENERATOR

@@ -261,7 +261,7 @@ struct LogsView: View {
                 Text(String(format: "%.2f ms", log.latencyMs))
                     .font(.caption2)
                     .fontWeight(.bold)
-                    .foregroundColor(log.latencyMs < 1.0 ? .green : (log.latencyMs < 20.0 ? .blue : .orange))
+                    .foregroundColor(Color(hex: log.serverColorHex))
             }
             
             HStack(spacing: 8) {

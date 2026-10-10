@@ -4,3 +4,7 @@ build_temp/
 .DS_Store
 xcuserdata/
 *.xcuserstate
+*.token
+*.zip
+Scripts/download_artifact.py
+Scripts/.token

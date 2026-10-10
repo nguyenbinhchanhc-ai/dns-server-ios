@@ -10,10 +10,16 @@ Closed-Loop Automated Test Suite for DNSGuard:
 """
 
 import sys
+import io
 import struct
 import zipfile
 import time
 from pathlib import Path
+
+# Ensure UTF-8 output on all platforms
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 # ANSI colors for test output
 GREEN = "\033[92m"
@@ -301,8 +307,46 @@ def classify_query_priority(domain: str) -> tuple[str, str]:
     return "P2", "#007AFF"
 
 
+def dynamic_color_hex(latency_ms: float) -> str:
+    if latency_ms < 15.0:
+        return "#34C759"
+    elif latency_ms < 25.0:
+        return "#007AFF"
+    elif latency_ms < 40.0:
+        return "#FFD60A"
+    elif latency_ms < 75.0:
+        return "#FF9500"
+    else:
+        return "#FF3B30"
+
+
+def dynamic_rating(latency_ms: float) -> str:
+    if latency_ms < 15.0:
+        return "Cực nhanh (<15ms)"
+    elif latency_ms < 25.0:
+        return "Mượt mà (15-25ms)"
+    elif latency_ms < 40.0:
+        return "Tiêu chuẩn (25-40ms)"
+    elif latency_ms < 75.0:
+        return "Trễ cao (40-75ms)"
+    else:
+        return "Lag / Nghẽn (>75ms)"
+
+
+def server_brand_badge(name: str) -> str:
+    lower = name.lower()
+    if "cloudflare" in lower: return "CF"
+    if "google" in lower: return "GG"
+    if "adguard" in lower: return "AG"
+    if "quad9" in lower: return "Q9"
+    if "nextdns" in lower: return "ND"
+    if "ram" in lower: return "RAM"
+    cleaned = "".join([c for c in name if c.isalnum()]).upper()
+    return cleaned[:2] if len(cleaned) >= 2 else "DS"
+
+
 def test_qos_priority_and_color_tagging():
-    print(f"\n{BLUE}=== 5. Testing QoS Priority Classification & Color Tagging ==={RESET}")
+    print(f"\n{BLUE}=== 5. Testing QoS Priority Classification & Dynamic Health Color System ==={RESET}")
     all_passed = True
 
     # 5.1 Test P0 Realtime Critical Domains
@@ -329,21 +373,35 @@ def test_qos_priority_and_color_tagging():
     p3_ad, col_ad = classify_query_priority("googleads.g.doubleclick.net")
     all_passed &= assert_test(p3_ad == "P3" and col_ad == "#8E8E93", "DoubleClick Tracker classified as P3 Ad-Suppression Sink (#8E8E93)")
 
-    # 5.5 Test Server Color Palette Integrity
-    server_palette = {
-        "1.1.1.1": "#007AFF", # Cloudflare Primary
-        "1.0.0.1": "#32ADE6", # Cloudflare Secondary
-        "8.8.8.8": "#34C759", # Google Primary
-        "8.8.4.4": "#30B0C7", # Google Secondary
-        "94.140.14.14": "#FF9500", # AdGuard
-        "9.9.9.9": "#AF52DE", # Quad9
-        "45.90.28.0": "#FF2D55", # NextDNS
-        "RAM_L1": "#00C7BE" # RAM Cache L1
-    }
-    all_passed &= assert_test(len(server_palette) == 8, "8 distinct Server Color Palettes verified")
-    all_passed &= assert_test(server_palette["1.1.1.1"] == "#007AFF", "Cloudflare palette mapped to Royal Blue")
-    all_passed &= assert_test(server_palette["8.8.8.8"] == "#34C759", "Google DNS palette mapped to Emerald Green")
-    all_passed &= assert_test(server_palette["RAM_L1"] == "#00C7BE", "RAM L1 Cache palette mapped to Ultra-Fast Mint")
+    # 5.5 Test Dynamic Real-Time Health Color Spectrum Mapping
+    all_passed &= assert_test(dynamic_color_hex(8.5) == "#34C759", "Latency 8.5ms (<15ms) maps to Emerald Green (#34C759)")
+    all_passed &= assert_test(dynamic_color_hex(18.2) == "#007AFF", "Latency 18.2ms (15-25ms) maps to Electric Cyan Blue (#007AFF)")
+    all_passed &= assert_test(dynamic_color_hex(32.0) == "#FFD60A", "Latency 32.0ms (25-40ms) maps to Amber Yellow (#FFD60A)")
+    all_passed &= assert_test(dynamic_color_hex(55.4) == "#FF9500", "Latency 55.4ms (40-75ms) maps to Warning Orange (#FF9500)")
+    all_passed &= assert_test(dynamic_color_hex(95.0) == "#FF3B30", "Latency 95.0ms (>75ms) maps to Alert Red (#FF3B30)")
+
+    # 5.6 Test Dynamic Rating Descriptions
+    all_passed &= assert_test("Cực nhanh" in dynamic_rating(10.0), "10ms rated as Cực nhanh (<15ms)")
+    all_passed &= assert_test("Mượt mà" in dynamic_rating(20.0), "20ms rated as Mượt mà (15-25ms)")
+    all_passed &= assert_test("Tiêu chuẩn" in dynamic_rating(35.0), "35ms rated as Tiêu chuẩn (25-40ms)")
+    all_passed &= assert_test("Trễ cao" in dynamic_rating(60.0), "60ms rated as Trễ cao (40-75ms)")
+    all_passed &= assert_test("Lag" in dynamic_rating(100.0), "100ms rated as Lag / Nghẽn (>75ms)")
+
+    # 5.7 Test Server Brand Identification Signatures
+    all_passed &= assert_test(server_brand_badge("Cloudflare (Primary)") == "CF", "Cloudflare maps to Brand Badge 'CF'")
+    all_passed &= assert_test(server_brand_badge("Google DNS (Primary)") == "GG", "Google DNS maps to Brand Badge 'GG'")
+    all_passed &= assert_test(server_brand_badge("AdGuard DNS (AdBlock)") == "AG", "AdGuard maps to Brand Badge 'AG'")
+    all_passed &= assert_test(server_brand_badge("Quad9 (Malware Filter)") == "Q9", "Quad9 maps to Brand Badge 'Q9'")
+    all_passed &= assert_test(server_brand_badge("NextDNS (Zero-Trust)") == "ND", "NextDNS maps to Brand Badge 'ND'")
+    all_passed &= assert_test(server_brand_badge("RAM L1 Cache") == "RAM", "RAM Cache maps to Brand Badge 'RAM'")
+
+    # 5.8 Dynamic Mutation Test: Server identity persists while color shifts in realtime
+    srv_name = "Cloudflare (Primary)"
+    srv_badge = server_brand_badge(srv_name)
+    color_normal = dynamic_color_hex(11.2) # Normal latency: green #34C759
+    color_congested = dynamic_color_hex(85.0) # Congested latency: red #FF3B30
+    all_passed &= assert_test(srv_badge == "CF" and color_normal == "#34C759", "Normal operation: Cloudflare is CF with Emerald Green")
+    all_passed &= assert_test(srv_badge == "CF" and color_congested == "#FF3B30", "Congested state: Cloudflare dynamically shifts to Alert Red while preserving CF badge")
 
     return all_passed
 
