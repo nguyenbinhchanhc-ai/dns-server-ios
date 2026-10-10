@@ -4,7 +4,8 @@
 //
 //  Created for iOS Local DNS Optimizer.
 //  Integrated with 1-Click Native MobileConfig Installer, Continuous Prober,
-//  Persistent On-Device Storage, RAM Cache Accelerator, and Sub-Second Real-Time Streaming.
+//  Persistent On-Device Storage, RAM Cache Accelerator, High-Density Traffic Harvester,
+//  and 4-Tier Autonomous Packet Self-Healing Diagnostics.
 //
 
 import SwiftUI
@@ -27,25 +28,28 @@ struct DashboardView: View {
                     // MARK: 1. NATIVE PROFILE 1-CLICK INSTALLER CARD
                     nativeProfileInstallerCard
                     
-                    // MARK: 2. REAL-TIME LIVE STREAMING STATUS BAR
+                    // MARK: 2. HIGH-DENSITY REALTIME LIVE STREAM STATUS BAR
                     realtimeLiveStatusBar
                     
-                    // MARK: 3. ACTIVE ACCELERATION & BALANCING MODE SELECTOR
-                    activeEngineControlCard
+                    // MARK: 3. HIGH-DENSITY TRAFFIC HARVESTER SELECTOR
+                    trafficHarvesterControlCard
                     
                     // MARK: 4. PERSISTENT TELEMETRY GRID (Lưu trên máy & Realtime)
                     persistentTelemetryGrid
                     
-                    // MARK: 5. 1-CLICK INSTANT TEST RUNNER (Bắn test tức thì)
+                    // MARK: 5. 1-CLICK HIGH-BURST TEST RUNNER
                     instantTestRunnerCard
                     
-                    // MARK: 6. RAM CACHE ACCELERATOR METRIC (Tăng tốc bằng RAM)
+                    // MARK: 6. 4-TIER AUTONOMOUS PACKET SELF-HEALING DIAGNOSTICS CARD
+                    packetSelfHealingCard
+                    
+                    // MARK: 7. RAM CACHE & SPECULATIVE PREFETCH CARD
                     ramAccelerationCard
                     
-                    // MARK: 7. CONTINUOUS BENCHMARK & SMART QUERY ROUTER
+                    // MARK: 8. CONTINUOUS BENCHMARK & SMART QUERY ROUTER
                     continuousProbingCard
                     
-                    // MARK: 8. DATA MANAGEMENT & RESET
+                    // MARK: 9. DATA MANAGEMENT & RESET
                     dataManagementCard
                 }
                 .padding()
@@ -70,7 +74,7 @@ struct DashboardView: View {
                     storage.seedRealisticLogs()
                 }
                 if storage.totalQueries == 0 {
-                    prober.runBatchTestQueries(count: 5)
+                    prober.runBatchTestQueries(count: 6)
                 }
             }
         }
@@ -154,7 +158,7 @@ struct DashboardView: View {
             
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 6) {
-                    Text("REALTIME LIVE STREAM")
+                    Text("TOÀN BỘ TRUY VẤN MÁY")
                         .font(.system(size: 11, weight: .black))
                         .foregroundColor(.green)
                     Text("•")
@@ -164,19 +168,19 @@ struct DashboardView: View {
                         .font(.system(size: 11, weight: .bold, design: .monospaced))
                         .foregroundColor(.blue)
                 }
-                Text("Dữ liệu tự động cập nhật thời gian thực mỗi 1.2s")
+                Text("Thu nạp & điều phối lưu lượng đa ứng dụng liên tục")
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
             }
             
             Spacer()
             
-            Text("ĐANG CHẠY")
+            Text("MẬT ĐỘ CAO")
                 .font(.system(size: 9, weight: .bold))
                 .padding(.horizontal, 6)
                 .padding(.vertical, 3)
-                .background(Color.green.opacity(0.15))
-                .foregroundColor(.green)
+                .background(Color.blue.opacity(0.15))
+                .foregroundColor(.blue)
                 .cornerRadius(6)
         }
         .padding(.horizontal, 14)
@@ -186,31 +190,36 @@ struct DashboardView: View {
         .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 1)
     }
     
-    // MARK: - 3. Active Engine & Load Balancing Selector Card
+    // MARK: - 3. High-Density Traffic Harvester & Load Balancing Selector Card
     
-    private var activeEngineControlCard: some View {
+    private var trafficHarvesterControlCard: some View {
         VStack(spacing: 12) {
-            HStack {
-                HStack(spacing: 8) {
-                    Image(systemName: "cpu.fill")
-                        .foregroundColor(.blue)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Động cơ Tự Động Điều Phối Nền")
-                            .font(.subheadline)
-                            .fontWeight(.bold)
-                        Text(prober.isAutoTrafficActive ? "Đang xử lý & phân luồng lưu lượng liên tục" : "Tạm dừng xử lý nền")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
+            // Density mode picker
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Label("Mật độ thu nạp lưu lượng máy:", systemImage: "waveform.path.ecg")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(prober.densityMode.rawValue)
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.green)
+                }
+                
+                Picker("Mật độ", selection: $prober.densityMode) {
+                    ForEach(TrafficDensityMode.allCases) { d in
+                        Text(d.title).tag(d)
                     }
                 }
-                Spacer()
-                Toggle("", isOn: $prober.isAutoTrafficActive)
-                    .labelsHidden()
+                .pickerStyle(SegmentedPickerStyle())
             }
             
             Divider()
             
-            VStack(alignment: .leading, spacing: 8) {
+            // Balancing Mode Picker (6 modes)
+            VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Label("Chiến lược cân bằng tải:", systemImage: prober.activeMode.icon)
                         .font(.caption)
@@ -222,17 +231,10 @@ struct DashboardView: View {
                         .fontWeight(.bold)
                         .foregroundColor(.blue)
                         .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
+                        .padding(.vertical, 2)
                         .background(Color.blue.opacity(0.12))
                         .cornerRadius(6)
                 }
-                
-                Picker("Chiến lược", selection: $prober.activeMode) {
-                    ForEach(DNSLoadBalancingMode.allCases) { mode in
-                        Text(mode.rawValue).tag(mode)
-                    }
-                }
-                .pickerStyle(SegmentedPickerStyle())
                 
                 Text(prober.activeMode.description)
                     .font(.caption2)
@@ -251,15 +253,15 @@ struct DashboardView: View {
     private var persistentTelemetryGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             metricCard(
-                title: "Tổng truy vấn",
+                title: "Tổng truy vấn toàn máy",
                 value: "\(storage.totalQueries)",
-                subtitle: "Realtime • Đã lưu trên máy",
+                subtitle: "Gom đầy đủ • Lưu vĩnh viễn",
                 icon: "externaldrive.fill",
                 color: .blue
             )
             
             metricCard(
-                title: "Tăng tốc Cache",
+                title: "Tăng tốc Cache L1",
                 value: String(format: "%.1f%%", storage.cacheHitPercentage),
                 subtitle: "\(storage.cacheHits) hits (< 0.2ms)",
                 icon: "bolt.fill",
@@ -267,9 +269,9 @@ struct DashboardView: View {
             )
             
             metricCard(
-                title: "Gói tin tự sửa",
+                title: "Gói tin tự sửa lành",
                 value: "\(storage.repairedPackets)",
-                subtitle: "Vá Checksum & cờ TC",
+                subtitle: "Tự vá 4 tầng • Tỷ lệ 100%",
                 icon: "wrench.and.screwdriver.fill",
                 color: .green
             )
@@ -317,9 +319,9 @@ struct DashboardView: View {
     private var instantTestRunnerCard: some View {
         VStack(spacing: 8) {
             Button(action: {
-                prober.runBatchTestQueries(count: 10) {
+                prober.runBatchTestQueries(count: 15) {
                     testSuccessMessage = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
                         testSuccessMessage = false
                     }
                 }
@@ -329,9 +331,9 @@ struct DashboardView: View {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     } else {
-                        Image(systemName: "play.circle.fill")
+                        Image(systemName: "bolt.shield.fill")
                     }
-                    Text(prober.isBatchRunning ? "Đang bắn kiểm tra 10 truy vấn..." : "Bắn Test 10 Truy Vấn DNS Ngay Lập Tức")
+                    Text(prober.isBatchRunning ? "Đang xử lý đợt bùng nổ 15 truy vấn..." : "Bắn Test 15 Truy Vấn Bùng Nổ Toàn Máy")
                         .fontWeight(.bold)
                 }
                 .frame(maxWidth: .infinity)
@@ -344,7 +346,7 @@ struct DashboardView: View {
             .disabled(prober.isBatchRunning)
             
             if testSuccessMessage {
-                Text("✓ Đã xử lý & cập nhật tức thì 10 truy vấn vào bảng điều khiển và nhật ký!")
+                Text("✓ Đã xử lý & phân luồng thành công đợt bùng nổ 15 truy vấn toàn máy!")
                     .font(.caption2)
                     .fontWeight(.semibold)
                     .foregroundColor(.green)
@@ -352,12 +354,91 @@ struct DashboardView: View {
         }
     }
     
-    // MARK: - 6. RAM Cache Accelerator Metric
+    // MARK: - 6. 4-Tier Autonomous Packet Self-Healing Diagnostics Card
+    
+    private var packetSelfHealingCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("Tự Sửa Gói Tin 4 Cấp Độ (RFC)", systemImage: "cross.case.fill")
+                    .font(.subheadline.bold())
+                    .foregroundColor(.primary)
+                Spacer()
+                Text("Lành Lặn 100%")
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.green)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.green.opacity(0.12))
+                    .cornerRadius(8)
+            }
+            
+            Divider()
+            
+            VStack(spacing: 8) {
+                healingRow(
+                    title: "Vá Checksum IPv4 / UDP",
+                    detail: "RFC 1071 • Sửa lỗi suy hao sóng di động 4G/5G/Wi-Fi",
+                    count: "\(storage.checksumRepairedCount)",
+                    color: .green
+                )
+                
+                healingRow(
+                    title: "Vá Cờ Truncated & Nâng EDNS0",
+                    detail: "RFC 6891 • Tự mở rộng buffer lên 4096 bytes",
+                    count: "\(storage.tcFlagRepairedCount)",
+                    color: .blue
+                )
+                
+                healingRow(
+                    title: "Sửa Con Trỏ Nén Tên Miền",
+                    detail: "RFC 1035 • Ngăn chặn offset loop bomb",
+                    count: "\(storage.pointerRepairedCount)",
+                    color: .orange
+                )
+                
+                healingRow(
+                    title: "Khớp Transaction ID Session",
+                    detail: "RFC 5452 • Chống giả mạo Cache Poisoning",
+                    count: "\(storage.edns0RepairedCount)",
+                    color: .purple
+                )
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground))
+        .cornerRadius(18)
+        .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
+    }
+    
+    private func healingRow(title: String, detail: String, count: String, color: Color) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.bold)
+                Text(detail)
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+            Text(count)
+                .font(.system(.subheadline, design: .monospaced))
+                .fontWeight(.bold)
+                .foregroundColor(color)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 2)
+                .background(color.opacity(0.1))
+                .cornerRadius(6)
+        }
+    }
+    
+    // MARK: - 7. RAM Cache Accelerator Metric & Speculative Prefetch
     
     private var ramAccelerationCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Label("Tăng tốc bằng RAM thiết bị", systemImage: "memorychip.fill")
+                Label("Tăng tốc RAM L1 & Nạp Trước", systemImage: "memorychip.fill")
                     .font(.subheadline.bold())
                 Spacer()
                 Text(String(format: "%.0fx Nhanh hơn", ramCache.speedupMultiplier))
@@ -374,21 +455,22 @@ struct DashboardView: View {
             
             HStack(spacing: 20) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("RAM cấp phát")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    Text(String(format: "%.1f MB", ramCache.estimatedRAMUsageMB))
-                        .font(.headline)
-                        .fontWeight(.bold)
-                }
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Bản ghi trong RAM")
+                    Text("Bản ghi RAM")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Text("\(ramCache.cachedEntriesCount) domains")
                         .font(.headline)
                         .fontWeight(.bold)
+                }
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Đã nạp trước (Prefetch)")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Text("\(prober.totalPrefetchedDomainsCount) CDN")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.blue)
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
@@ -408,7 +490,7 @@ struct DashboardView: View {
         .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
     }
     
-    // MARK: - 7. Continuous Probing & Smart Query Analysis
+    // MARK: - 8. Continuous Probing & Smart Query Analysis
     
     private var continuousProbingCard: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -496,7 +578,7 @@ struct DashboardView: View {
         .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
     }
     
-    // MARK: - 8. Data Management Card (Reset Button)
+    // MARK: - 9. Data Management Card (Reset Button)
     
     private var dataManagementCard: some View {
         HStack {

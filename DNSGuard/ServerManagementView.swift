@@ -4,7 +4,7 @@
 //
 //  Created for iOS Local DNS Optimizer.
 //  Server Pool Manager with continuous real-time latency monitoring,
-//  multi-mode load balancing control, and per-server load distribution.
+//  6 advanced load balancing algorithms, and per-server load distribution.
 //
 
 import SwiftUI
@@ -54,9 +54,9 @@ struct ServerManagementView: View {
                     .padding(.vertical, 4)
                 }
                 
-                // MARK: 1. LOAD BALANCING STRATEGY SELECTION
+                // MARK: 1. 6 LOAD BALANCING STRATEGIES SELECTION
                 Section(
-                    header: Text("Chiến lược cân bằng tải DNS"),
+                    header: Text("6 Chiến lược cân bằng tải DNS nâng cao"),
                     footer: Text(prober.activeMode.description)
                 ) {
                     Picker("Chế độ", selection: $prober.activeMode) {

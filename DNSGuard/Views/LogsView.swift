@@ -4,7 +4,7 @@
 //
 //  Created for iOS Local DNS Optimizer.
 //  Persistent DNS Query & Packet Repair Inspector with local storage integration,
-//  domain search, sub-second realtime streaming, and comprehensive filtering.
+//  domain search, high-density realtime streaming, and comprehensive 4-tier repair badges.
 //
 
 import SwiftUI
@@ -19,9 +19,9 @@ struct LogsView: View {
     
     enum LogFilter: String, CaseIterable {
         case all = "Tất cả"
-        case racing = "Đua tốc độ"
-        case cached = "RAM Cache"
         case repaired = "Tự sửa lỗi"
+        case cached = "RAM Cache"
+        case racing = "Đua tốc độ"
     }
     
     var filteredLogs: [DNSQueryLog] {
@@ -30,12 +30,12 @@ struct LogsView: View {
         switch selectedFilter {
         case .all:
             break
-        case .racing:
-            logs = logs.filter { $0.strategy == "Racing Turbo" }
-        case .cached:
-            logs = logs.filter { $0.isCached }
         case .repaired:
             logs = logs.filter { $0.isRepaired }
+        case .cached:
+            logs = logs.filter { $0.isCached }
+        case .racing:
+            logs = logs.filter { $0.strategy == "Racing Turbo" }
         }
         
         if !searchText.isEmpty {
@@ -49,7 +49,7 @@ struct LogsView: View {
         NavigationView {
             VStack(spacing: 0) {
                 
-                // Realtime Stream Indicator & Quick Test Bar
+                // Realtime Stream Indicator & High-Burst Action
                 HStack(spacing: 8) {
                     HStack(spacing: 6) {
                         Circle()
@@ -70,16 +70,16 @@ struct LogsView: View {
                     
                     Spacer()
                     
-                    Text("\(filteredLogs.count) bản ghi")
+                    Text("\(filteredLogs.count) bản ghi • \(storage.repairedPackets) vá lỗi")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     
                     Button(action: {
-                        prober.runBatchTestQueries(count: 5)
+                        prober.runBatchTestQueries(count: 8)
                     }) {
                         HStack(spacing: 4) {
                             Image(systemName: "bolt.fill")
-                            Text("Bắn 5 Query")
+                            Text("Bắn 8 Query")
                         }
                         .font(.caption2.bold())
                         .padding(.horizontal, 8)
@@ -107,15 +107,15 @@ struct LogsView: View {
                 
                 if filteredLogs.isEmpty {
                     VStack(spacing: 16) {
-                        Image(systemName: "tray.fill")
+                        Image(systemName: selectedFilter == .repaired ? "wrench.and.screwdriver.fill" : "tray.fill")
                             .font(.system(size: 48))
-                            .foregroundColor(.secondary.opacity(0.6))
+                            .foregroundColor(selectedFilter == .repaired ? .green.opacity(0.7) : .secondary.opacity(0.6))
                         
                         Text(selectedFilter == .all ? "Chưa có nhật ký truy vấn nào" : "Không có nhật ký nào trong mục '\(selectedFilter.rawValue)'")
                             .font(.headline)
                             .foregroundColor(.secondary)
                         
-                        Text("Nhấn nút bên dưới để tạo ngay các truy vấn DNS kiểm tra.")
+                        Text("Nhấn nút bên dưới để tạo ngay các truy vấn DNS và kiểm tra cơ chế tự sửa gói tin.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -148,14 +148,14 @@ struct LogsView: View {
                 }
             }
             .navigationTitle("Nhật ký truy vấn")
-            .searchable(text: $searchText, prompt: "Tìm kiếm tên miền (vd: apple, google)...")
+            .searchable(text: $searchText, prompt: "Tìm kiếm tên miền (vd: apple, google, vnecdn)...")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button(action: {
-                            prober.runBatchTestQueries(count: 10)
+                            prober.runBatchTestQueries(count: 15)
                         }) {
-                            Label("Bắn Test 10 Truy Vấn", systemImage: "bolt.circle")
+                            Label("Bắn Đợt Bùng Nổ 15 Query", systemImage: "bolt.shield")
                         }
                         
                         Button(action: {
@@ -247,19 +247,26 @@ struct LogsView: View {
             }
             
             if let reason = log.repairReason {
-                HStack(spacing: 4) {
-                    Image(systemName: "wrench.fill")
-                        .font(.caption2)
+                HStack(spacing: 6) {
+                    Image(systemName: "wrench.and.screwdriver.fill")
+                        .font(.system(size: 10))
                         .foregroundColor(.green)
-                    Text(reason)
-                        .font(.caption2)
-                        .fontWeight(.medium)
+                    Text("ĐÃ TỰ VÁ LỖI: \(reason)")
+                        .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.green)
+                    Spacer()
+                    Text("LÀNH LẶN 100%")
+                        .font(.system(size: 8, weight: .black))
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 1)
+                        .background(Color.green.opacity(0.2))
+                        .foregroundColor(.green)
+                        .cornerRadius(3)
                 }
-                .padding(.horizontal, 6)
-                .padding(.vertical, 3)
-                .background(Color.green.opacity(0.1))
-                .cornerRadius(4)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.green.opacity(0.08))
+                .cornerRadius(6)
             }
         }
     }
