@@ -1,0 +1,6 @@
+# Build and temp directories
+build_temp/
+*.ipa
+.DS_Store
+xcuserdata/
+*.xcuserstate

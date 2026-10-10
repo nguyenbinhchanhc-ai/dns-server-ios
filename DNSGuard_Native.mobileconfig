@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerAddresses</key>
+				<array>
+					<string>1.1.1.1</string>
+					<string>1.0.0.1</string>
+					<string>8.8.8.8</string>
+					<string>8.8.4.4</string>
+					<string>2606:4700:4700::1111</string>
+					<string>2606:4700:4700::1001</string>
+				</array>
+				<key>ServerURL</key>
+				<string>https://cloudflare-dns.com/dns-query</string>
+			</dict>
+			<key>PayloadDescription</key>
+			<string>Điều phối toàn bộ truy vấn DNS của iOS qua máy chủ tối ưu Cloudflare và Google với cơ chế mã hóa DoH và tự động sửa lỗi.</string>
+			<key>PayloadDisplayName</key>
+			<string>DNSGuard Smart DNS (Cloudflare + Google DoH)</string>
+			<key>PayloadIdentifier</key>
+			<string>com.antigravity.dnsguard.encrypteddns</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>9F82A45C-12B4-4D6F-9C8E-7B93E2A15F01</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>ProhibitDisablement</key>
+			<false/>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Cấu hình DNS tối ưu tốc độ cao và bảo mật native cho iPhone/iPad</string>
+	<key>PayloadDisplayName</key>
+	<string>DNSGuard - Smart DNS Profile</string>
+	<key>PayloadIdentifier</key>
+	<string>com.antigravity.dnsguard.profile</string>
+	<key>PayloadOrganization</key>
+	<string>DNSGuard</string>
+	<key>PayloadRemovalDisallowed</key>
+	<false/>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>3A4B5C6D-7E8F-9012-3456-789ABCDEF012</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

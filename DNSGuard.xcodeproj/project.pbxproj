@@ -1,0 +1,363 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A001000129B7F10000000001 /* DNSGuardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000129B7F10000000001 /* DNSGuardApp.swift */; };
+		A001000229B7F10000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000229B7F10000000002 /* ContentView.swift */; };
+		A001000329B7F10000000003 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000329B7F10000000003 /* DashboardView.swift */; };
+		A001000429B7F10000000004 /* ServerManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000429B7F10000000004 /* ServerManagementView.swift */; };
+		A001000529B7F10000000005 /* LogsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000529B7F10000000005 /* LogsView.swift */; };
+		A001000629B7F10000000006 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000629B7F10000000006 /* SettingsView.swift */; };
+		A001000729B7F10000000007 /* VPNManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000729B7F10000000007 /* VPNManager.swift */; };
+		A001000829B7F10000000008 /* SharedDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000829B7F10000000008 /* SharedDataManager.swift */; };
+		A001000929B7F10000000009 /* DNSQueryLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000929B7F10000000009 /* DNSQueryLog.swift */; };
+		A001000A29B7F1000000000A /* AppGroupConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000A29B7F1000000000A /* AppGroupConstants.swift */; };
+		A001000B29B7F1000000000B /* DNSLoadBalancer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000529B7F10000000005 /* DNSLoadBalancer.swift */; };
+		A001000C29B7F1000000000C /* DNSGuardTunnel.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C001000229B7F10000000002 /* DNSGuardTunnel.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		
+		A002000129B7F10000000001 /* PacketTunnelProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000129B7F10000000001 /* PacketTunnelProvider.swift */; };
+		A002000229B7F10000000002 /* DNSEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000229B7F10000000002 /* DNSEngine.swift */; };
+		A002000329B7F10000000003 /* DNSPacketParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000329B7F10000000003 /* DNSPacketParser.swift */; };
+		A002000429B7F10000000004 /* PacketRepairer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000429B7F10000000004 /* PacketRepairer.swift */; };
+		A002000529B7F10000000005 /* DNSLoadBalancer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000529B7F10000000005 /* DNSLoadBalancer.swift */; };
+		A002000629B7F10000000006 /* DNSCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000629B7F10000000006 /* DNSCache.swift */; };
+		A002000729B7F10000000007 /* DNSUpstreamDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000729B7F10000000007 /* DNSUpstreamDispatcher.swift */; };
+		A002000829B7F10000000008 /* IPPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000829B7F10000000008 /* IPPacket.swift */; };
+		A002000929B7F10000000009 /* DNSRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = B002000929B7F10000000009 /* DNSRecord.swift */; };
+		A002000A29B7F1000000000A /* AppGroupConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001000A29B7F1000000000A /* AppGroupConstants.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E001000129B7F10000000001 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A001000C29B7F1000000000C /* DNSGuardTunnel.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		C001000129B7F10000000001 /* DNSGuard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DNSGuard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C001000229B7F10000000002 /* DNSGuardTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DNSGuardTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		
+		B001000129B7F10000000001 /* DNSGuardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSGuardApp.swift; sourceTree = "<group>"; };
+		B001000229B7F10000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B001000329B7F10000000003 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		B001000429B7F10000000004 /* ServerManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerManagementView.swift; sourceTree = "<group>"; };
+		B001000529B7F10000000005 /* LogsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogsView.swift; sourceTree = "<group>"; };
+		B001000629B7F10000000006 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B001000729B7F10000000007 /* VPNManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VPNManager.swift; sourceTree = "<group>"; };
+		B001000829B7F10000000008 /* SharedDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDataManager.swift; sourceTree = "<group>"; };
+		B001000929B7F10000000009 /* DNSQueryLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSQueryLog.swift; sourceTree = "<group>"; };
+		B001000A29B7F1000000000A /* AppGroupConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppGroupConstants.swift; path = ../Shared/AppGroupConstants.swift; sourceTree = "<group>"; };
+		B001000B29B7F1000000000B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B001000C29B7F1000000000C /* DNSGuard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DNSGuard.entitlements; sourceTree = "<group>"; };
+		
+		B002000129B7F10000000001 /* PacketTunnelProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacketTunnelProvider.swift; sourceTree = "<group>"; };
+		B002000229B7F10000000002 /* DNSEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSEngine.swift; sourceTree = "<group>"; };
+		B002000329B7F10000000003 /* DNSPacketParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSPacketParser.swift; sourceTree = "<group>"; };
+		B002000429B7F10000000004 /* PacketRepairer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacketRepairer.swift; sourceTree = "<group>"; };
+		B002000529B7F10000000005 /* DNSLoadBalancer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSLoadBalancer.swift; sourceTree = "<group>"; };
+		B002000629B7F10000000006 /* DNSCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSCache.swift; sourceTree = "<group>"; };
+		B002000729B7F10000000007 /* DNSUpstreamDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSUpstreamDispatcher.swift; sourceTree = "<group>"; };
+		B002000829B7F10000000008 /* IPPacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPPacket.swift; sourceTree = "<group>"; };
+		B002000929B7F10000000009 /* DNSRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DNSRecord.swift; sourceTree = "<group>"; };
+		B002000A29B7F1000000000A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B002000B29B7F1000000000B /* DNSGuardTunnel.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DNSGuardTunnel.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		000000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000002 /* DNSGuard */,
+				000000000000000000000003 /* DNSGuardTunnel */,
+				000000000000000000000004 /* Shared */,
+				000000000000000000000005 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		000000000000000000000002 /* DNSGuard */ = {
+			isa = PBXGroup;
+			children = (
+				B001000129B7F10000000001 /* DNSGuardApp.swift */,
+				B001000229B7F10000000002 /* ContentView.swift */,
+				B001000329B7F10000000003 /* DashboardView.swift */,
+				B001000429B7F10000000004 /* ServerManagementView.swift */,
+				B001000529B7F10000000005 /* LogsView.swift */,
+				B001000629B7F10000000006 /* SettingsView.swift */,
+				B001000729B7F10000000007 /* VPNManager.swift */,
+				B001000829B7F10000000008 /* SharedDataManager.swift */,
+				B001000929B7F10000000009 /* DNSQueryLog.swift */,
+				B001000B29B7F1000000000B /* Info.plist */,
+				B001000C29B7F1000000000C /* DNSGuard.entitlements */,
+			);
+			path = DNSGuard;
+			sourceTree = "<group>";
+		};
+		000000000000000000000003 /* DNSGuardTunnel */ = {
+			isa = PBXGroup;
+			children = (
+				B002000129B7F10000000001 /* PacketTunnelProvider.swift */,
+				B002000229B7F10000000002 /* DNSEngine.swift */,
+				B002000329B7F10000000003 /* DNSPacketParser.swift */,
+				B002000429B7F10000000004 /* PacketRepairer.swift */,
+				B002000529B7F10000000005 /* DNSLoadBalancer.swift */,
+				B002000629B7F10000000006 /* DNSCache.swift */,
+				B002000729B7F10000000007 /* DNSUpstreamDispatcher.swift */,
+				B002000829B7F10000000008 /* IPPacket.swift */,
+				B002000929B7F10000000009 /* DNSRecord.swift */,
+				B002000A29B7F1000000000A /* Info.plist */,
+				B002000B29B7F1000000000B /* DNSGuardTunnel.entitlements */,
+			);
+			path = DNSGuardTunnel;
+			sourceTree = "<group>";
+		};
+		000000000000000000000004 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				B001000A29B7F1000000000A /* AppGroupConstants.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		000000000000000000000005 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C001000129B7F10000000001 /* DNSGuard.app */,
+				C001000229B7F10000000002 /* DNSGuardTunnel.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D001000129B7F10000000001 /* DNSGuard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F001000129B7F10000000001 /* Build configuration list for PBXNativeTarget "DNSGuard" */;
+			buildPhases = (
+				S001000129B7F10000000001 /* Sources */,
+				E001000129B7F10000000001 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D001000329B7F10000000003 /* PBXTargetDependency */,
+			);
+			name = DNSGuard;
+			productName = DNSGuard;
+			productReference = C001000129B7F10000000001 /* DNSGuard.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D001000229B7F10000000002 /* DNSGuardTunnel */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F001000229B7F10000000002 /* Build configuration list for PBXNativeTarget "DNSGuardTunnel" */;
+			buildPhases = (
+				S002000129B7F10000000001 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DNSGuardTunnel;
+			productName = DNSGuardTunnel;
+			productReference = C001000229B7F10000000002 /* DNSGuardTunnel.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		000000000000000000000000 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1400;
+				TargetAttributes = {
+					D001000129B7F10000000001 = {
+						CreatedOnToolsVersion = 14.0;
+					};
+					D001000229B7F10000000002 = {
+						CreatedOnToolsVersion = 14.0;
+					};
+				};
+			};
+			buildConfigurationList = F000000129B7F10000000001 /* Build configuration list for PBXProject "DNSGuard" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 000000000000000000000001;
+			productRefGroup = 000000000000000000000005 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D001000129B7F10000000001 /* DNSGuard */,
+				D001000229B7F10000000002 /* DNSGuardTunnel */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		S001000129B7F10000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A001000129B7F10000000001 /* DNSGuardApp.swift in Sources */,
+				A001000229B7F10000000002 /* ContentView.swift in Sources */,
+				A001000329B7F10000000003 /* DashboardView.swift in Sources */,
+				A001000429B7F10000000004 /* ServerManagementView.swift in Sources */,
+				A001000529B7F10000000005 /* LogsView.swift in Sources */,
+				A001000629B7F10000000006 /* SettingsView.swift in Sources */,
+				A001000729B7F10000000007 /* VPNManager.swift in Sources */,
+				A001000829B7F10000000008 /* SharedDataManager.swift in Sources */,
+				A001000929B7F10000000009 /* DNSQueryLog.swift in Sources */,
+				A001000A29B7F1000000000A /* AppGroupConstants.swift in Sources */,
+				A001000B29B7F1000000000B /* DNSLoadBalancer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		S002000129B7F10000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A002000129B7F10000000001 /* PacketTunnelProvider.swift in Sources */,
+				A002000229B7F10000000002 /* DNSEngine.swift in Sources */,
+				A002000329B7F10000000003 /* DNSPacketParser.swift in Sources */,
+				A002000429B7F10000000004 /* PacketRepairer.swift in Sources */,
+				A002000529B7F10000000005 /* DNSLoadBalancer.swift in Sources */,
+				A002000629B7F10000000006 /* DNSCache.swift in Sources */,
+				A002000729B7F10000000007 /* DNSUpstreamDispatcher.swift in Sources */,
+				A002000829B7F10000000008 /* IPPacket.swift in Sources */,
+				A002000929B7F10000000009 /* DNSRecord.swift in Sources */,
+				A002000A29B7F1000000000A /* AppGroupConstants.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D001000329B7F10000000003 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D001000229B7F10000000002 /* DNSGuardTunnel */;
+			targetProxy = P001000129B7F10000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXContainerItemProxy section */
+		P001000129B7F10000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000000 /* Project object */;
+			proxyType = 1;
+			target = D001000229B7F10000000002 /* DNSGuardTunnel */;
+			targetString = DNSGuardTunnel;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin XCBuildConfiguration section */
+		C000000129B7F10000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C000000229B7F10000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		C001000329B7F10000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "DNSGuard/Resources/DNSGuard.entitlements";
+				INFOPLIST_FILE = "DNSGuard/Resources/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.antigravity.dnsguard";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		C001000429B7F10000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "DNSGuard/Resources/DNSGuard.entitlements";
+				INFOPLIST_FILE = "DNSGuard/Resources/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.antigravity.dnsguard";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		C002000329B7F10000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "DNSGuardTunnel/Resources/DNSGuardTunnel.entitlements";
+				INFOPLIST_FILE = "DNSGuardTunnel/Resources/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.antigravity.dnsguard.tunnel";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		C002000429B7F10000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "DNSGuardTunnel/Resources/DNSGuardTunnel.entitlements";
+				INFOPLIST_FILE = "DNSGuardTunnel/Resources/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.antigravity.dnsguard.tunnel";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F000000129B7F10000000001 /* Build configuration list for PBXProject "DNSGuard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C000000129B7F10000000001 /* Debug */,
+				C000000229B7F10000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F001000129B7F10000000001 /* Build configuration list for PBXNativeTarget "DNSGuard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C001000329B7F10000000001 /* Debug */,
+				C001000429B7F10000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F001000229B7F10000000002 /* Build configuration list for PBXNativeTarget "DNSGuardTunnel" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C002000329B7F10000000001 /* Debug */,
+				C002000429B7F10000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = 000000000000000000000000 /* Project object */;
+}
