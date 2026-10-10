@@ -2,121 +2,121 @@
 //  SettingsView.swift
 //  DNSGuard
 //
-//  Created for iOS Local DNS VPN & Optimizer.
-//  Settings: Load balancing algorithm, cache policies, and error self-healing switches.
+//  Created for iOS Local DNS Optimizer.
+//  Settings for RAM cache acceleration, continuous probing, and persistent data reset.
 //
 
 import SwiftUI
 
 struct SettingsView: View {
-    @ObservedObject var dataManager = SharedDataManager.shared
+    @ObservedObject var storage = StorageManager.shared
+    @ObservedObject var ramCache = RAMCacheAccelerator.shared
+    @ObservedObject var profileServer = ProfileServer.shared
     
-    @State private var autoRepairIPChecksum = true
-    @State private var autoRepairUDPChecksum = true
-    @State private var autoHealTruncated = true
-    @State private var filterMalformedPackets = true
-    @State private var cacheCapacity = 4096.0
-    @State private var showingPurgeAlert = false
-    @State private var purgeConfirmed = false
+    @State private var showingResetAlert = false
     
     var body: some View {
         NavigationView {
             Form {
-                // MARK: - Load Balancing Strategy
-                Section(header: Text("Thuật toán điều phối & Cân bằng tải"), footer: Text("Chế độ Racing sẽ gửi song song truy vấn đến 3 server nhanh nhất và lấy ngay kết quả đầu tiên để triệt tiêu độ trễ mạng.")) {
-                    Picker("Chiến lược", selection: Binding(
-                        get: { dataManager.currentStrategy },
-                        set: { dataManager.updateStrategy($0) }
-                    )) {
-                        ForEach(LoadBalancingStrategy.allCases, id: \.self) { strat in
-                            Text(strat.rawValue).tag(strat)
+                // MARK: - Native Profile Installation
+                Section(
+                    header: Text("Hồ sơ DNS Native (Apple DoH)"),
+                    footer: Text("Cài đặt hồ sơ trực tiếp vào iOS Settings giúp bạn sử dụng DNS tối ưu 100% thời gian mà không bị lỗi cấp quyền VPN.")
+                ) {
+                    Button(action: {
+                        profileServer.openProfileInSafari()
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.down.doc.fill")
+                                .foregroundColor(.blue)
+                            Text("Mở cài đặt Profile qua Safari")
+                                .fontWeight(.semibold)
                         }
                     }
                 }
                 
-                // MARK: - Packet Self-Healing
-                Section(header: Text("Cơ chế tự sửa gói tin lỗi (Self-Healing)"), footer: Text("Khi phát hiện gói tin DNS hoặc IP/UDP bị sai lệch checksum hay bị cắt cụt do đường truyền suy hao, hệ thống sẽ tự động tính toán lại RFC 1071 và chuyển hướng TCP/DoH để tái tạo gói tin hoàn chỉnh.")) {
-                    Toggle("Tự động sửa Checksum IPv4", isOn: $autoRepairIPChecksum)
-                    Toggle("Tự động sửa Checksum UDP & Pseudo-Header", isOn: $autoRepairUDPChecksum)
-                    Toggle("Tự phục hồi gói tin cắt cụt (TC Truncated)", isOn: $autoHealTruncated)
-                    Toggle("Lọc và chặn gói DNS dị dạng / Loop Attack", isOn: $filterMalformedPackets)
-                }
-                
-                // MARK: - In-Memory Cache
-                Section(header: Text("Tăng tốc bộ nhớ đệm (LRU In-Memory Cache)"), footer: Text("Lưu tạm thời câu trả lời DNS trong RAM điện thoại với TTL đếm ngược. Các truy vấn lặp lại được phản hồi ngay trong < 0.5 ms.")) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack {
-                            Text("Dung lượng bộ nhớ")
-                            Spacer()
-                            Text("\(Int(cacheCapacity)) mục")
-                                .foregroundColor(.secondary)
-                        }
-                        Slider(value: $cacheCapacity, in: 512...8192, step: 512)
+                // MARK: - RAM Cache Acceleration
+                Section(
+                    header: Text("Tăng tốc bằng RAM thiết bị (L1 In-Memory Cache)"),
+                    footer: Text("Sử dụng bộ nhớ RAM thật của iPhone để lưu các tên miền thường dùng, giúp tốc độ phản hồi đạt mức dưới 0.2ms.")
+                ) {
+                    Toggle("Bật cơ chế tăng tốc RAM", isOn: $ramCache.isRAMAcceleratorEnabled)
+                    
+                    HStack {
+                        Text("Dung lượng RAM đang dùng")
+                        Spacer()
+                        Text(String(format: "%.1f MB", ramCache.estimatedRAMUsageMB))
+                            .foregroundColor(.secondary)
                     }
                     
-                    Button(role: .destructive, action: { showingPurgeAlert = true }) {
+                    HStack {
+                        Text("Tốc độ RAM L1")
+                        Spacer()
+                        Text(String(format: "%.2f ms", ramCache.averageRAMLookupTimeMs))
+                            .fontWeight(.bold)
+                            .foregroundColor(.green)
+                    }
+                    
+                    Button("Làm mới bộ nhớ RAM L1") {
+                        ramCache.clearRAMCache()
+                        ramCache.preloadPopularDomainsIntoRAM()
+                    }
+                }
+                
+                // MARK: - Persistent Storage & Reset Data
+                Section(
+                    header: Text("Lưu trữ dữ liệu trên máy"),
+                    footer: Text("Mọi số liệu truy vấn và đo đạc được lưu trong ổ nhớ máy, không bị mất khi đóng app. Bạn có thể xóa bất cứ lúc nào.")
+                ) {
+                    HStack {
+                        Text("Tổng truy vấn đã lưu")
+                        Spacer()
+                        Text("\(storage.totalQueries)")
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    HStack {
+                        Text("Ngày bắt đầu ghi nhận")
+                        Spacer()
+                        Text(storage.installedDate, style: .date)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Button(role: .destructive, action: {
+                        showingResetAlert = true
+                    }) {
                         HStack {
-                            Image(systemName: "trash.circle")
-                            Text("Xóa toàn bộ Cache hiện tại")
+                            Image(systemName: "arrow.counterclockwise.circle.fill")
+                            Text("Reset Dữ Liệu về 0")
                         }
+                        .foregroundColor(.red)
                     }
                 }
                 
-                // MARK: - Tunnel Details
-                Section(header: Text("Thông tin mạng ảo (Tunnel Details)")) {
-                    HStack {
-                        Text("Cấu trúc VPN")
-                        Spacer()
-                        Text("On-Device Local Loopback")
-                            .foregroundColor(.secondary)
-                    }
-                    HStack {
-                        Text("Virtual TUN IP")
-                        Spacer()
-                        Text("10.8.0.2")
-                            .font(.system(.body, design: .monospaced))
-                            .foregroundColor(.secondary)
-                    }
-                    HStack {
-                        Text("Virtual DNS Gateway")
-                        Spacer()
-                        Text("10.8.0.1:53")
-                            .font(.system(.body, design: .monospaced))
-                            .foregroundColor(.secondary)
-                    }
-                    HStack {
-                        Text("Network Extension")
-                        Spacer()
-                        Text("NEPacketTunnelProvider")
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                Section(header: Text("Về ứng dụng")) {
+                // MARK: - App Version
+                Section(header: Text("Thông tin ứng dụng")) {
                     HStack {
                         Text("Phiên bản")
                         Spacer()
-                        Text("1.0.0 (Build 2026.1)")
+                        Text("2.0.0 (Native DoH + RAM Engine)")
                             .foregroundColor(.secondary)
                     }
                     HStack {
-                        Text("Bản quyền")
+                        Text("Kiến trúc")
                         Spacer()
-                        Text("Antigravity Engine")
+                        Text("Apple DoH + Local RAM Cache")
                             .foregroundColor(.secondary)
                     }
                 }
             }
             .navigationTitle("Cài đặt")
-            .alert(isPresented: $showingPurgeAlert) {
-                Alert(
-                    title: Text("Xác nhận xóa Cache"),
-                    message: Text("Toàn bộ bảng ghi DNS đã cache trong RAM sẽ được giải phóng."),
-                    primaryButton: .destructive(Text("Xóa Cache")) {
-                        purgeConfirmed = true
-                    },
-                    secondaryButton: .cancel()
-                )
+            .alert("Xác nhận Reset Dữ Liệu", isPresented: $showingResetAlert) {
+                Button("Xóa & Reset", role: .destructive) {
+                    storage.resetAllData()
+                }
+                Button("Hủy", role: .cancel) { }
+            } message: {
+                Text("Toàn bộ số lượng truy vấn, thời gian tăng tốc và lịch sử đã lưu trên máy sẽ trở về 0.")
             }
         }
     }

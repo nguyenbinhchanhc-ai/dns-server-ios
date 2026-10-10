@@ -2,19 +2,18 @@
 //  ServerManagementView.swift
 //  DNSGuard
 //
-//  Created for iOS Local DNS VPN & Optimizer.
-//  Server Pool Manager: Upstream DNS list, latency monitors,
-//  and custom server configuration.
+//  Created for iOS Local DNS Optimizer.
+//  Server Pool Manager with continuous real-time latency monitoring,
+//  stability ranking, and custom server addition.
 //
 
 import SwiftUI
 
 struct ServerManagementView: View {
-    @State private var servers: [UpstreamServer] = DNSLoadBalancer.defaultServers
-    @State private var isTestingSpeed = false
-    @State private var showingAddSheet = false
+    @ObservedObject var prober = ContinuousDNSProber.shared
+    @ObservedObject var profileServer = ProfileServer.shared
     
-    // Form fields for adding server
+    @State private var showingAddSheet = false
     @State private var newName = ""
     @State private var newIP = ""
     @State private var newDoH = ""
@@ -22,57 +21,95 @@ struct ServerManagementView: View {
     var body: some View {
         NavigationView {
             List {
-                Section(header: Text("Tối ưu hóa & Đo tốc độ")) {
-                    Button(action: runSpeedTest) {
-                        HStack {
-                            Image(systemName: isTestingSpeed ? "arrow.triangle.2.circlepath" : "bolt.horizontal.circle.fill")
-                                .foregroundColor(.accentColor)
-                                .rotationEffect(.degrees(isTestingSpeed ? 360 : 0))
-                                .animation(isTestingSpeed ? Animation.linear(duration: 1).repeatForever(autoreverses: false) : .default, value: isTestingSpeed)
-                            
-                            VStack(alignment: .leading) {
-                                Text(isTestingSpeed ? "Đang đo độ trễ các server..." : "Kiểm tra tốc độ máy chủ")
-                                    .fontWeight(.medium)
-                                Text("Đo RTT thực tế từ mạng hiện tại để cân bằng tải")
+                Section(header: Text("Tình trạng đo liên tục (Live Monitor)")) {
+                    HStack {
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(prober.isProbingActive ? Color.green : Color.gray)
+                                .frame(width: 10, height: 10)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(prober.isProbingActive ? "Đang liên tục kiểm tra (Mỗi 3.5s)" : "Đang tạm dừng")
+                                    .fontWeight(.semibold)
+                                Text("Tổng số lần kiểm tra: \(prober.totalProbesCompleted)")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
-                            Spacer()
+                        }
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            prober.isProbingActive.toggle()
+                            if prober.isProbingActive {
+                                prober.startContinuousProbing()
+                            } else {
+                                prober.stopContinuousProbing()
+                            }
+                        }) {
+                            Text(prober.isProbingActive ? "Tạm dừng" : "Bật lại")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(prober.isProbingActive ? .orange : .blue)
                         }
                     }
-                    .disabled(isTestingSpeed)
+                    .padding(.vertical, 4)
                 }
                 
-                Section(header: Text("Danh sách máy chủ DNS trong Pool"), footer: Text("Hệ thống sẽ tự động phối hợp và đua các máy chủ bật (ON) có độ trễ thấp nhất để trả lời truy vấn nhanh nhất.")) {
-                    ForEach($servers) { $server in
+                Section(
+                    header: Text("Bảng xếp hạng máy chủ DNS thời gian thực"),
+                    footer: Text("Hệ thống tự động phân tích RTT và tỷ lệ ổn định để đưa máy chủ tốt nhất lên vị trí ưu tiên.")
+                ) {
+                    ForEach(prober.benchmarks.sorted(by: { $0.latencyMs < $1.latencyMs })) { server in
                         HStack(spacing: 12) {
                             Circle()
-                                .fill(latencyColor(server.averageLatencyMs))
+                                .fill(latencyColor(server.latencyMs))
                                 .frame(width: 10, height: 10)
                             
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(server.name)
-                                    .fontWeight(.semibold)
-                                Text("\(server.ipAddress) • \(server.dohURL != nil ? "DoH + UDP" : "UDP")")
+                            VStack(alignment: .leading, spacing: 3) {
+                                HStack {
+                                    Text(server.name)
+                                        .fontWeight(.semibold)
+                                    if server.isFastest {
+                                        Text("FASTEST")
+                                            .font(.system(size: 9, weight: .bold))
+                                            .padding(.horizontal, 5)
+                                            .padding(.vertical, 2)
+                                            .background(Color.green.opacity(0.15))
+                                            .foregroundColor(.green)
+                                            .cornerRadius(4)
+                                    }
+                                }
+                                Text("\(server.ip) • Ổn định \(server.stabilityScore)%")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
                             
                             Spacer()
                             
-                            Text(String(format: "%.0f ms", server.averageLatencyMs))
-                                .font(.system(.caption, design: .monospaced))
-                                .fontWeight(.bold)
-                                .foregroundColor(latencyColor(server.averageLatencyMs))
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(latencyColor(server.averageLatencyMs).opacity(0.12))
-                                .cornerRadius(6)
-                            
-                            Toggle("", isOn: $server.isEnabled)
-                                .labelsHidden()
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text(String(format: "%.1f ms", server.latencyMs))
+                                    .font(.system(.caption, design: .monospaced))
+                                    .fontWeight(.bold)
+                                    .foregroundColor(latencyColor(server.latencyMs))
+                                
+                                Text(server.status)
+                                    .font(.system(size: 9))
+                                    .foregroundColor(.secondary)
+                            }
                         }
                         .padding(.vertical, 4)
+                    }
+                }
+                
+                Section(header: Text("Tải Profile Riêng Theo Từng Máy Chủ")) {
+                    Button(action: {
+                        profileServer.openProfileInSafari()
+                    }) {
+                        HStack {
+                            Image(systemName: "square.and.arrow.down")
+                            Text("Cài Profile tổ hợp tối ưu (Cloudflare + Google DoH)")
+                                .font(.subheadline)
+                        }
                     }
                 }
             }
@@ -95,10 +132,10 @@ struct ServerManagementView: View {
         NavigationView {
             Form {
                 Section(header: Text("Thông tin máy chủ mới")) {
-                    TextField("Tên máy chủ (vd: NextDNS, Cloudflare Family)", text: $newName)
-                    TextField("Địa chỉ IPv4 (vd: 45.90.28.0)", text: $newIP)
+                    TextField("Tên máy chủ (vd: OpenDNS, NextDNS)", text: $newName)
+                    TextField("Địa chỉ IPv4", text: $newIP)
                         .keyboardType(.numbersAndPunctuation)
-                    TextField("URL DoH (Tùy chọn, vd: https://...)", text: $newDoH)
+                    TextField("URL DoH (Tùy chọn)", text: $newDoH)
                         .keyboardType(.URL)
                 }
             }
@@ -107,13 +144,13 @@ struct ServerManagementView: View {
                 leading: Button("Hủy") { showingAddSheet = false },
                 trailing: Button("Thêm") {
                     guard !newName.isEmpty, !newIP.isEmpty else { return }
-                    let newServer = UpstreamServer(
+                    let newBenchmark = LiveServerBenchmark(
                         name: newName,
-                        ipAddress: newIP,
-                        dohURL: newDoH.isEmpty ? nil : newDoH,
-                        averageLatencyMs: 35.0
+                        ip: newIP,
+                        dohURL: newDoH.isEmpty ? "https://dns.google/dns-query" : newDoH,
+                        latencyMs: 30.0
                     )
-                    servers.append(newServer)
+                    prober.benchmarks.append(newBenchmark)
                     newName = ""
                     newIP = ""
                     newDoH = ""
@@ -124,28 +161,9 @@ struct ServerManagementView: View {
         }
     }
     
-    private func runSpeedTest() {
-        isTestingSpeed = true
-        DispatchQueue.global(qos: .userInitiated).async {
-            for i in 0..<servers.count {
-                // Simulate realistic probe or real RTT
-                let randomRTT = Double.random(in: 11.0...42.0)
-                DispatchQueue.main.async {
-                    servers[i].averageLatencyMs = randomRTT
-                }
-                Thread.sleep(forTimeInterval: 0.2)
-            }
-            DispatchQueue.main.async {
-                isTestingSpeed = false
-                // Sort by speed
-                servers.sort { $0.averageLatencyMs < $1.averageLatencyMs }
-            }
-        }
-    }
-    
     private func latencyColor(_ ms: Double) -> Color {
-        if ms < 20 { return .green }
-        if ms < 45 { return .yellow }
+        if ms < 18 { return .green }
+        if ms < 35 { return .orange }
         return .red
     }
 }
